@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#964BFA">
+<title>MY NAGHI Content Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: MY NAGHI design system — white/sand surfaces, lilac accent, Space Grotesk, pill controls, shadow cards (no borders) */
+:root{
+  --bg:#F6F1E6;          /* light sand light */
+  --surface:#FFFFFF;
+  --sand:#EDE5D0;
+  --sunk:#F5F5F5;        /* grey-100 */
+  --line:#E8E8E8;        /* grey-200 */
+  --fg:#1A1A1A; --muted:#6B7D99;  /* black / blue-grey */
+  --accent:#964BFA; --accent-hover:#7B35E0; --accent-ink:#FFFFFF; --accent-soft:#F2EAFF; --accent-text:#6F2DD4;
+  --ok:#1F8A5B; --warn:#C2410C;
+  --shadow:0 4px 16px rgba(26,26,26,.10); --shadow-lg:0 12px 40px rgba(26,26,26,.14); --shadow-accent:0 4px 24px rgba(150,75,250,.20);
+  --font:"Space Grotesk","IBM Plex Sans Arabic","Helvetica Neue",Arial,sans-serif;
+  --ease:cubic-bezier(.25,.1,.25,1);
+  --r-sm:8px; --r:16px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1A1A1A; --surface:#232323; --sand:#2E2A22; --sunk:#2A2A2A; --line:#3A3A3A;
+  --fg:#F6F1E6; --muted:#A8B4C8; --accent:#B47AFB; --accent-hover:#C495FC; --accent-ink:#1A1A1A; --accent-soft:#2E2340; --accent-text:#B47AFB;
+  --ok:#4FC890; --warn:#F08A5D; --shadow:0 4px 16px rgba(0,0,0,.35); --shadow-lg:0 12px 40px rgba(0,0,0,.45); --shadow-accent:0 4px 24px rgba(180,122,251,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1A1A1A; --surface:#232323; --sand:#2E2A22; --sunk:#2A2A2A; --line:#3A3A3A;
+  --fg:#F6F1E6; --muted:#A8B4C8; --accent:#B47AFB; --accent-hover:#C495FC; --accent-ink:#1A1A1A; --accent-soft:#2E2340; --accent-text:#B47AFB;
+  --ok:#4FC890; --warn:#F08A5D; --shadow:0 4px 16px rgba(0,0,0,.35); --shadow-lg:0 12px 40px rgba(0,0,0,.45); --shadow-accent:0 4px 24px rgba(180,122,251,.25); color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:400 15px/1.6 var(--font);margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{transition:background-color 150ms var(--ease),color 150ms var(--ease),transform 150ms var(--ease),box-shadow 250ms var(--ease)}
+button:active{transform:scale(.97)}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar-in{max-width:1120px;margin:0 auto;padding:0 16px;height:64px;display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:12px;color:var(--fg)}
+.wm{height:16px;width:auto;display:block}
+.brand .sep{width:1px;height:20px;background:var(--line)}
+.brand span{font-weight:500;font-size:14px;color:var(--muted);white-space:nowrap}
+@media (max-width:400px){.brand .sep,.brand span{display:none}}
+.pill{font-size:10px;font-weight:600;line-height:1;text-transform:uppercase;letter-spacing:.12em;padding:6px 10px;border-radius:9999px;background:var(--accent-soft);color:var(--accent-text)}
+.spacer{flex:1}
+.lang{border:1.5px solid var(--fg);background:transparent;border-radius:9999px;padding:6px 16px;cursor:pointer;font-weight:600;font-size:14px}
+.lang:hover{background:var(--fg);color:var(--bg)}
+
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:32px 64px;display:grid;gap:24px}
+.hello h1{font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.1;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.hello p{margin:10px 0 0;color:var(--muted);max-width:60ch}
+[dir="rtl"] .hello h1{letter-spacing:0}
+
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tab{display:flex;gap:14px;align-items:center;text-align:start;background:var(--surface);border:0;border-radius:var(--r);padding:16px;cursor:pointer;box-shadow:var(--shadow);outline:2px solid transparent;outline-offset:-2px}
+.tab:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.tab:active{transform:scale(.98)}
+.tab[aria-selected="true"]{outline-color:var(--accent)}
+.tab .ic{width:44px;height:44px;flex:none;border-radius:9999px;background:var(--sand);display:grid;place-items:center;color:var(--fg)}
+.tab[aria-selected="true"] .ic{background:var(--accent);color:var(--accent-ink)}
+.tab b{display:block;font-weight:600;font-size:17px;line-height:1.25;letter-spacing:-.01em}
+.tab small{color:var(--muted);font-size:13px}
+
+.strip{background:var(--surface);border-radius:var(--r);padding:20px;display:grid;gap:14px;box-shadow:var(--shadow)}
+.strip-row{display:flex;flex-wrap:wrap;gap:16px 32px}
+.spec{margin:0;display:flex;flex-wrap:wrap;gap:8px}
+.spec span{font-size:12px;line-height:1;padding:7px 12px;border-radius:9999px;background:var(--sand);color:var(--muted);font-variant-numeric:tabular-nums}
+.spec span b{color:var(--fg);font-weight:600}
+.kit{border-top:1px solid var(--line);padding-top:14px}
+.kit summary{cursor:pointer;font-weight:600;font-size:15px;display:flex;gap:10px;align-items:center}
+.kit summary small{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ok)}
+.kit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:14px}
+.kit .note{margin:0}
+.kit-wide{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.kit .ex{margin-top:12px}
+.kit-foot{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:12px}
+.count{font-size:11px;line-height:1;color:var(--muted);font-variant-numeric:tabular-nums}
+.count.over{color:var(--warn)}
+.work{display:grid;grid-template-columns:minmax(0,390px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:840px){.work{grid-template-columns:1fr}}
+.panel{background:var(--surface);border-radius:var(--r);padding:20px;display:grid;gap:16px;box-shadow:var(--shadow)}
+.panel h2{font-weight:600;font-size:20px;line-height:1.25;letter-spacing:-.01em;margin:0}
+.field{display:grid;gap:8px}
+.field label,.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+[dir="rtl"] .field label,[dir="rtl"] .lbl{letter-spacing:0;text-transform:none;font-size:13px}
+input[type=text],textarea,select{width:100%;background:var(--sunk);border:1.5px solid transparent;border-radius:var(--r-sm);padding:11px 14px;transition:border-color 150ms var(--ease),background-color 150ms var(--ease)}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);outline:none;background:var(--surface)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:9999px;padding:7px 16px;font-size:14px;font-weight:500;cursor:pointer}
+.chip:hover{border-color:var(--fg)}
+.chip[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.toggles{display:flex;flex-wrap:wrap;gap:16px}
+.toggles label{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
+input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+
+.go{background:var(--accent);color:var(--accent-ink);border:0;border-radius:9999px;padding:14px 28px;font-weight:600;font-size:15px;letter-spacing:.01em;cursor:pointer;display:flex;justify-content:center;gap:8px;align-items:center;box-shadow:var(--shadow-accent)}
+.go:hover{background:var(--accent-hover)}
+.go:disabled{opacity:.6;cursor:progress}
+.ghost{background:transparent;border:1.5px solid var(--fg);border-radius:9999px;padding:7px 16px;cursor:pointer;font-size:13px;font-weight:600}
+.ghost:hover{background:var(--fg);color:var(--bg)}
+
+.out-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.out-head h2{flex:1}
+.mode{font-size:10px;font-weight:600;line-height:1;letter-spacing:.12em;text-transform:uppercase;padding:6px 10px;border-radius:9999px;background:var(--sand);color:var(--muted)}
+.mode.ai{color:var(--ok)}
+.results{display:grid;gap:12px}
+.card{background:var(--sand);border-radius:var(--r);padding:18px;display:grid;gap:12px;min-width:0;transition:transform 250ms var(--ease),box-shadow 250ms var(--ease)}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.card .txt{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;line-height:1.7}
+.card .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card .tag{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.card .meta .spacer{flex:1}
+.copy.done{color:var(--ok);border-color:var(--ok)}
+.empty{color:var(--muted);text-align:center;padding:32px 12px;border-radius:var(--r);background:var(--sunk)}
+.note{font-size:13px;color:var(--muted);margin:0}
+.err{color:var(--warn)}
+
+.gate{display:grid;gap:8px}
+.gate-row{display:flex;gap:8px}
+.gate-row input{flex:1;min-width:0}
+.hist{display:grid;gap:8px}
+.hist-item{display:flex;gap:10px;align-items:center;background:var(--sunk);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;min-width:0}
+.hist-item span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-item em{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--accent-text)}
+
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
+.thinking{animation:pulse 1.2s var(--ease) infinite}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+
+<header class="bar"><div class="bar-in">
+  <div class="brand"><svg class="wm" role="img" aria-label="MY NAGHI" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4236 437"><g fill="currentColor"><path d="M0,263.6h126v-126C0,137.5,0,263.6,0,263.6Z"></path>  <path d="M288.1,137.5V10.1c-126,0-126,127.4-126,127.4v127.4c126,0,126-127.4,126-127.4Z"></path>  <path d="M288.9,300.9h-127.4c0,126,127.4,126,127.4,126h127.4c0-126-127.4-126-127.4-126Z"></path>  <path d="M288.4,263.6h127.7s127.7,0,127.7-126h-127.7s-127.7,0-127.7,126Z"></path>  <polygon points="2679.2 245.5 2600.8 426.9 2653 426.9 2703 306.5 2679.3 245.5 2679.2 245.5"></polygon>  <polygon points="2762 30.4 2927.6 426.8 2927.6 426.9 2981.4 426.9 2815.9 30.4 2762 30.4"></polygon>  <polygon points="1009.7 341.2 1008.6 341.2 866.5 30.4 817.2 30.4 994.7 426.8 1022.7 426.8 1152.6 94.3 1153.7 94.3 1153.7 426.8 1200 426.8 1200 30.4 1132.8 30.4 1009.7 341.2"></polygon>  <polygon points="1522.5 209.5 1413 30.4 1354.1 30.4 1499.3 256.1 1499.3 426.8 1545.6 426.8 1545.6 256.1 1690.9 30.4 1635.3 30.4 1522.5 209.5"></polygon>  <path d="M3338.9,248.9h89.6v121.5c-14.4,7.4-30.2,13.1-47.4,17-17.5,3.9-33.8,5.9-49.6,5.9-23.9,0-45.8-4.1-65.5-12.3-19.9-8.4-36.8-19.8-51-34.5s-25.1-32.3-33-52.4c-7.8-20.1-11.8-41.6-11.8-65.5s4-46,11.8-66.1c7.8-20.1,18.8-37.6,33-52.1,14.3-14.7,30.8-26,49.9-34.2,19.1-8.2,39.8-12.3,62.2-12.3s39.3,3.9,58.1,11.7c19,8,35,19.1,48.2,33.7l34.6-37c-18.7-19.1-40-32.6-63.6-40.4-23.6-7.8-48.4-11.7-74.1-11.7s-56.7,5-82,15.1-47.5,24.3-66.6,42.3c-19.2,18.2-34.1,40-44.9,65.5-10.9,25.6-16.2,54.3-16.2,85.4s5.1,59.2,15.4,84.8c10.4,25.6,24.7,47.5,43.3,65.8,18.6,18.4,40.5,32.6,65.8,42.6,25.3,10.1,53.3,15.1,83.7,15.1s50.4-2.9,75.2-8.9c24.7-6,48.4-15.2,70.8-27.9h.1v-194.8h-136v43.7Z"></path>  <polygon points="3935.9 198.5 3727.9 198.5 3727.9 30.4 3681.6 30.4 3681.6 426.8 3727.9 426.8 3727.9 242.1 3935.9 242.1 3935.9 426.8 3982.2 426.8 3982.2 30.4 3935.9 30.4 3935.9 198.5"></polygon>  <rect x="4189" y="30.4" width="46.3" height="396.4"></rect>  <polygon points="2392.6 359.6 2391.5 359.6 2165.9 30.4 2111.1 30.4 2203.1 168.1 2380.4 426.8 2438.8 426.8 2438.8 30.4 2392.6 30.4 2392.6 359.6"></polygon>  <polygon points="2112 426.9 2158.3 426.9 2158.3 268.8 2112 189.6 2112 426.9"></polygon>  <polygon points="817.7 426.9 864 426.9 864 294.9 817.7 189.6 817.7 426.9"></polygon></g></svg><i class="sep"></i><span data-t="brand"></span></div>
+  <span class="pill" id="modePill">Demo</span>
+  <div class="spacer"></div>
+  <button class="lang" id="langBtn" aria-label="Switch language">ع</button>
+</div></header>
+
+<main class="wrap">
+  <section class="hello">
+    <h1 data-t="hello"></h1>
+    <p data-t="sub"></p>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-prompt" aria-selected="true" data-tool="prompt">
+      <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></span>
+      <span><b data-t="tPrompt"></b><small data-t="tPromptSub"></small></span>
+    </button>
+    <button class="tab" role="tab" id="tab-caption" aria-selected="false" data-tool="caption">
+      <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></span>
+      <span><b data-t="tCaption"></b><small data-t="tCaptionSub"></small></span>
+    </button>
+  </nav>
+
+  <section class="strip">
+    <div class="strip-row">
+      <div class="field"><span class="lbl" data-t="chan"></span>
+        <div class="chips" id="chanChips"></div></div>
+      <div class="field"><span class="lbl" data-t="fmt"></span>
+        <div class="chips" id="fmtChips"></div></div>
+    </div>
+    <p class="spec" id="spec"></p>
+    <details class="kit" id="kit">
+      <summary><span data-t="kit"></span> <small id="kitState"></small></summary>
+      <div class="kit-grid">
+        <div class="field"><label for="bName" data-t="bName"></label><input type="text" id="bName" data-ph="bNamePh"></div>
+        <div class="field"><label for="bAud" data-t="bAud"></label><input type="text" id="bAud" data-ph="bAudPh"></div>
+        <div class="field"><label for="bKeys" data-t="bKeys"></label><input type="text" id="bKeys" data-ph="bKeysPh"></div>
+        <div class="field"><label for="bAvoid" data-t="bAvoid"></label><input type="text" id="bAvoid" data-ph="bAvoidPh"></div>
+      </div>
+      <div class="kit-grid kit-wide">
+        <div class="field"><label for="bVoice" data-t="bVoice"></label><textarea id="bVoice" rows="5"></textarea></div>
+        <div class="field"><label for="bVisual" data-t="bVisual"></label><textarea id="bVisual" rows="5"></textarea></div>
+      </div>
+      <div class="field ex"><label for="bEx" data-t="bEx"></label><textarea id="bEx" rows="5" data-ph="bExPh"></textarea></div>
+      <div class="kit-foot"><p class="note" data-t="kitNote"></p><button type="button" class="ghost" id="kitReset" data-t="kitReset"></button></div>
+    </details>
+  </section>
+
+  <div class="work">
+    <!-- PROMPT FORM -->
+    <form class="panel" id="form-prompt">
+      <h2 data-t="tPrompt"></h2>
+      <div class="field"><span class="lbl" data-t="pFor"></span>
+        <div class="chips" data-group="pTarget">
+          <button type="button" class="chip" data-v="image" aria-pressed="true" data-t="image"></button>
+          <button type="button" class="chip" data-v="video" aria-pressed="false" data-t="video"></button>
+          <button type="button" class="chip" data-v="chat" aria-pressed="false" data-t="chat"></button>
+        </div>
+      </div>
+      <div class="field"><label for="pIdea" data-t="pIdea"></label>
+        <textarea id="pIdea" data-ph="pIdeaPh"></textarea></div>
+      <div class="row">
+        <div class="field"><label for="pStyle" data-t="pStyle"></label>
+          <select id="pStyle" data-opts="styles"></select></div>
+        <div class="field"><label for="pMood" data-t="pMood"></label>
+          <select id="pMood" data-opts="moods"></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="pRatio" data-t="pRatio"></label>
+          <select id="pRatio"><option>1:1</option><option>4:5</option><option>9:16</option><option>16:9</option></select></div>
+        <div class="field"><label for="pDetail" data-t="pDetail"></label>
+          <select id="pDetail" data-opts="details"></select></div>
+      </div>
+      <button class="go" type="submit" id="go-prompt"><span data-t="gen"></span></button>
+    </form>
+
+    <!-- CAPTION FORM -->
+    <form class="panel" id="form-caption" hidden>
+      <h2 data-t="tCaption"></h2>
+      <div class="field"><label for="cTopic" data-t="cTopic"></label>
+        <textarea id="cTopic" data-ph="cTopicPh"></textarea></div>
+      <div class="row">
+        <div class="field"><label for="cTone" data-t="cTone"></label>
+          <select id="cTone" data-opts="tones"></select></div>
+        <div class="field"><label for="cLen" data-t="cLen"></label>
+          <select id="cLen" data-opts="lens"></select></div>
+      </div>
+      <div class="field"><label for="cLang" data-t="cLang"></label>
+        <select id="cLang"><option value="en">English</option><option value="ar">العربية</option><option value="both">English + العربية</option></select></div>
+      <div class="toggles">
+        <label><input type="checkbox" id="cEmoji"> <span data-t="emoji"></span></label>
+        <label><input type="checkbox" id="cTags" checked> <span data-t="tags"></span></label>
+        <label><input type="checkbox" id="cCta"> <span data-t="cta"></span></label>
+      </div>
+      <button class="go" type="submit" id="go-caption"><span data-t="gen"></span></button>
+    </form>
+
+    <!-- RESULTS -->
+    <section class="panel" aria-live="polite">
+      <div class="out-head">
+        <h2 data-t="results"></h2>
+        <span class="mode" id="modeTag"></span>
+        <button class="ghost" id="again" type="button" data-t="again"></button>
+      </div>
+      <div class="results" id="results"></div>
+      <p class="note" id="note"></p>
+      <form class="gate" id="gate" hidden>
+        <label for="pass" class="lbl" data-t="passLbl"></label>
+        <div class="gate-row"><input type="text" id="pass" autocomplete="off"><button class="ghost" type="submit" data-t="unlock"></button></div>
+      </form>
+      <div class="field" id="histWrap" hidden>
+        <span class="lbl" data-t="recent"></span>
+        <div class="hist" id="hist"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+/* ---------- 1. TEXT (English + Arabic) ---------- */
+const T = {
+  en:{brand:"Content Hub",hello:"What are we making today?",sub:"Pick a tool, describe your idea, and get ready-to-use AI prompts or social captions in seconds.",
+    tPrompt:"Prompt Generator",tPromptSub:"For image, video and chat AI",tCaption:"Caption Generator",tCaptionSub:"For your social posts",
+    pFor:"Prompt for",image:"Image AI",video:"Video AI",chat:"Chat AI",pIdea:"Your idea",pIdeaPh:"e.g. a cozy coffee shop in Jeddah at sunset",
+    pStyle:"Style",pMood:"Mood",pRatio:"Aspect ratio",pDetail:"Detail",
+    cPlat:"Platform",cTopic:"What's the post about?",cTopicPh:"e.g. launching our new date-filled cookies for National Day",
+    cTone:"Tone",cLen:"Length",cLang:"Caption language",emoji:"Emojis",tags:"Hashtags",cta:"Call to action",
+    gen:"Generate",results:"Results",again:"Regenerate",copy:"Copy",copied:"Copied",recent:"Recent",
+    emptyP:"Your prompts will appear here.",emptyC:"Your captions will appear here.",thinking:"Writing…",
+    ai:"AI",local:"Templates",needIdea:"Describe your idea first.",
+    aiOff:"AI isn't available here, so these come from the built-in templates.",
+    styles:["Photorealistic","Cinematic","3D render","Anime","Watercolor","Minimal flat","Vintage film"],
+    moods:["Warm","Dreamy","Bold","Calm","Dramatic","Playful","Luxurious"],
+    details:["Short","Balanced","Very detailed"],
+    tones:["Friendly","Professional","Funny","Inspiring","Luxury","Bold"],
+    lens:["Short","Medium","Long"],
+    chan:"Channel",fmt:"Format",kit:"Brand voice",kitOn:"ON",bName:"Brand name",bNamePh:"e.g. MY NAGHI",bAud:"Audience",bAudPh:"e.g. car buyers in Saudi Arabia",
+    bKeys:"Always mention",bKeysPh:"e.g. free delivery, #DarBakery",bAvoid:"Never say",bAvoidPh:"e.g. cheap, discount",
+    kitNote:"Saved in this browser and added to every prompt and caption.",
+    bVoice:"Tone of voice",bVisual:"Visual style",bEx:"Real posts to copy the voice from",bExPh:"Paste 3–5 captions from your TikTok, Instagram and LinkedIn. The AI matches their wording, length and emoji use.",
+    kitReset:"Reset to MY NAGHI voice",passLbl:"Team passcode",unlock:"Unlock AI",passBad:"That passcode didn't work. Ask your team lead for the current one.",
+    sRatio:"Size",sLen:"Length",sCap:"Caption",sTags:"Hashtags",chars:"chars"},
+  ar:{brand:"مركز المحتوى",hello:"ماذا سنصنع اليوم؟",sub:"اختر الأداة، صف فكرتك، واحصل على أوامر ذكاء اصطناعي أو كابشنات جاهزة خلال ثوانٍ.",
+    tPrompt:"مولّد البرومبت",tPromptSub:"لأدوات الصور والفيديو والمحادثة",tCaption:"مولّد الكابشن",tCaptionSub:"لمنشوراتك على السوشال ميديا",
+    pFor:"البرومبت لـ",image:"صور",video:"فيديو",chat:"محادثة",pIdea:"فكرتك",pIdeaPh:"مثال: مقهى دافئ في جدة وقت الغروب",
+    pStyle:"الأسلوب",pMood:"الإحساس",pRatio:"المقاس",pDetail:"التفاصيل",
+    cPlat:"المنصة",cTopic:"عن ماذا المنشور؟",cTopicPh:"مثال: إطلاق كوكيز التمر الجديد لليوم الوطني",
+    cTone:"النبرة",cLen:"الطول",cLang:"لغة الكابشن",emoji:"إيموجي",tags:"هاشتاقات",cta:"دعوة لاتخاذ إجراء",
+    gen:"توليد",results:"النتائج",again:"توليد من جديد",copy:"نسخ",copied:"تم النسخ",recent:"الأحدث",
+    emptyP:"ستظهر البرومبتات هنا.",emptyC:"ستظهر الكابشنات هنا.",thinking:"جارٍ الكتابة…",
+    ai:"ذكاء اصطناعي",local:"قوالب",needIdea:"اكتب فكرتك أولاً.",
+    aiOff:"الذكاء الاصطناعي غير متاح هنا، لذلك النتائج من القوالب المدمجة.",
+    styles:["واقعي","سينمائي","ثلاثي الأبعاد","أنمي","ألوان مائية","بسيط مسطح","فيلم قديم"],
+    moods:["دافئ","حالم","جريء","هادئ","درامي","مرح","فاخر"],
+    details:["قصير","متوازن","مفصل جداً"],
+    tones:["ودّي","احترافي","مضحك","ملهم","فاخر","جريء"],
+    lens:["قصير","متوسط","طويل"],
+    chan:"القناة",fmt:"نوع المحتوى",kit:"صوت العلامة",kitOn:"مفعّلة",bName:"اسم العلامة",bNamePh:"مثال: مخبز دار",bAud:"الجمهور",bAudPh:"مثال: العائلات الشابة في الرياض",
+    bKeys:"اذكر دائماً",bKeysPh:"مثال: توصيل مجاني، ‎#مخبز_دار",bAvoid:"تجنّب",bAvoidPh:"مثال: رخيص، تخفيض",
+    kitNote:"تُحفظ في هذا المتصفح وتُضاف لكل برومبت وكابشن.",
+    bVoice:"نبرة الصوت",bVisual:"الهوية البصرية",bEx:"منشورات حقيقية لمحاكاة أسلوبها",bExPh:"الصق ٣–٥ كابشنات من حساباتكم في تيك توك وإنستغرام ولينكدإن، وسيحاكي الذكاء الاصطناعي صياغتها وطولها واستخدامها للإيموجي.",
+    kitReset:"استرجاع نبرة MY NAGHI",passLbl:"رمز الفريق",unlock:"تفعيل الذكاء الاصطناعي",passBad:"الرمز غير صحيح. اطلب الرمز الحالي من مسؤول الفريق.",
+    sRatio:"المقاس",sLen:"المدة",sCap:"الكابشن",sTags:"هاشتاقات",chars:"حرف"}
+};
+
+/* ---------- 1b. CHANNELS (add a channel or format here) ---------- */
+// ratio = recommended size, len = video length, limit = caption character limit, tags = suggested hashtag count
+const CH = {
+  TikTok:   {limit:4000, tags:"3–5", formats:[
+    {k:"video",    en:"Video",          ar:"فيديو",         ratio:"9:16", len:"15–60s", video:true},
+    {k:"photo",    en:"Photo carousel", ar:"كاروسيل صور",   ratio:"9:16"}]},
+  Instagram:{limit:2200, tags:"3–5", formats:[
+    {k:"reel",     en:"Reel",           ar:"ريلز",          ratio:"9:16", len:"15–90s", video:true},
+    {k:"post",     en:"Post",           ar:"منشور",         ratio:"4:5"},
+    {k:"carousel", en:"Carousel",       ar:"كاروسيل",       ratio:"4:5"},
+    {k:"story",    en:"Story",          ar:"ستوري",         ratio:"9:16", len:"≤60s", video:true}]},
+  LinkedIn: {limit:3000, tags:"3–5", formats:[
+    {k:"post",     en:"Post",           ar:"منشور",         ratio:"1:1"},
+    {k:"document", en:"Document carousel", ar:"كاروسيل PDF", ratio:"4:5"},
+    {k:"video",    en:"Video",          ar:"فيديو",         ratio:"16:9", len:"30s–3min", video:true}]},
+  Snapchat: {limit:250,  tags:"1–3", formats:[
+    {k:"story",    en:"Story",          ar:"ستوري",         ratio:"9:16", len:"≤60s", video:true},
+    {k:"spotlight",en:"Spotlight",      ar:"سبوتلايت",      ratio:"9:16", len:"5–60s", video:true}]}
+};
+// English keys used inside prompts, regardless of UI language
+const EN = T.en;
+
+/* ---------- 2. STATE ---------- */
+const store = {
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+};
+let lang = store.get("muse.lang","en");
+let tool = store.get("muse.tool","prompt");
+let history = store.get("muse.hist",[]);
+let channel = store.get("muse.chan","Instagram");
+if (!CH[channel]) channel = "Instagram";
+let format = store.get("muse.fmt","reel");
+/* ---------- 1c. MY NAGHI BRAND VOICE (edit to fine-tune) ---------- */
+const BRAND_DEFAULT = {
+  name:"MY NAGHI",
+  aud:"Car buyers across Saudi Arabia: first-time buyers, families and luxury owners",
+  keys:"MYNAGHI.SA",
+  avoid:"cheap, hidden fees, exaggerated claims, competitor names, prices or offers that aren't confirmed",
+  voice:"Direct, confident and premium. Warm but composed: approachable, never slangy, never pushy. Short declarative sentences, every word earns its place. Sentence case; always write MY NAGHI in full caps. Use the brand word MY for ownership in campaign lines, as punchy duets like \"MY car. MY way.\" Speak to the customer as \"you\" when talking about the product or service. No emojis unless asked. Warm Saudi hospitality with digital-first convenience. The journey is: Search. Select. Drive. Proof points to use when relevant: 35+ years in the Kingdom, Saudi Arabia's official multi-brand car platform, 5,000+ cars, transparent pricing, online financing, home delivery, 24/7 support. Brands: BMW, MINI, Rolls-Royce, Genesis, Infiniti, Lincoln, MG, Ford, Nissan, Hyundai, Jaguar, Range Rover, Defender, Discovery. Arabic: clear modern Arabic with a light Saudi touch.",
+  visual:"Premium, clean automotive photography and video. The car is the hero in clean, uncluttered frames with flat, simple backgrounds. Colour vibe: warm whites, light sand (#EDE5D0) and soft light, with lilac (#964BFA) as the only accent colour. No gradients, no textures, no harsh flash, no gritty grain. Modern Saudi settings: Riyadh skyline, Jeddah corniche, desert highways, AlUla. Golden hour or soft studio light, polished natural grading. Lifestyle and person-centred moments are welcome. Leave clean space for the MY NAGHI logo and a headline set in Space Grotesk.",
+  examples:""
+};
+// How the voice shifts per channel
+const CH_VOICE = {
+  TikTok:"TikTok: energetic but composed, native to the platform, Arabic-first with a light Saudi dialect, hook in the first line, short sentences.",
+  Instagram:"Instagram: polished and aspirational, Arabic and English, a strong first line, campaign-style MY duets work well here.",
+  LinkedIn:"LinkedIn: corporate and professional, English or formal Arabic, talk about milestones, partnerships, digital transformation and Vision 2030, no slang, minimal emojis.",
+  Snapchat:"Snapchat: very short, friendly and casual, Arabic-first."
+};
+let brand = Object.assign({}, BRAND_DEFAULT, store.get("muse.brand3",{}));
+const fmt = () => CH[channel].formats.find(f=>f.k===format) || CH[channel].formats[0];
+let sample = null;      // set when AI becomes available
+let last = null;        // last request, for "Regenerate"
+const $ = id => document.getElementById(id);
+
+/* ---------- 3. LANGUAGE ---------- */
+function applyLang(){
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = t[el.dataset.t]);
+  document.querySelectorAll("[data-ph]").forEach(el => el.placeholder = t[el.dataset.ph]);
+  document.querySelectorAll("select[data-opts]").forEach(sel => {
+    const i = Math.max(0, sel.selectedIndex);
+    sel.innerHTML = t[sel.dataset.opts].map((o,k)=>`<option value="${k}">${o}</option>`).join("");
+    sel.selectedIndex = i;
+  });
+  $("langBtn").textContent = lang === "ar" ? "EN" : "ع";
+  setMode(); renderChannels(); kitState();
+  if (!$("results").children.length || $("results").querySelector(".empty")) showEmpty();
+  renderHist();
+}
+$("langBtn").onclick = () => { lang = lang === "ar" ? "en" : "ar"; store.set("muse.lang",lang); applyLang(); };
+
+let serverAI = false;   // true once the website's own AI (/api/generate) has answered
+function setMode(){
+  const t = T[lang], on = !!sample || serverAI;
+  $("modeTag").textContent = on ? t.ai : t.local;
+  $("modeTag").className = "mode" + (on ? " ai" : "");
+  $("modePill").textContent = on ? "AI" : "Demo";
+}
+
+/* ---------- 3b. WEBSITE AI (Netlify function at /api/generate) ---------- */
+// Returns parsed JSON, null when there is no server AI, or throws "passcode".
+async function askServer(prompt){
+  if (!/^https?:$/.test(location.protocol)) return null;
+  let res;
+  try {
+    res = await fetch("/api/generate", {method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({prompt, passcode: store.get("muse.pass","")})});
+  } catch { return null; }
+  if (res.status === 401) throw "passcode";
+  if (!res.ok) return null;
+  const {text} = await res.json().catch(()=>({}));
+  if (!text) return null;
+  const a = text.indexOf("{"), b = text.lastIndexOf("}");
+  try { const data = JSON.parse(text.slice(a, b+1)); serverAI = true; setMode(); return data; } catch { return null; }
+}
+$("gate").onsubmit = e => { e.preventDefault(); store.set("muse.pass", $("pass").value.trim()); $("gate").hidden = true;
+  last ? generate(last) : null; };
+
+/* ---------- 4. TABS + CHIPS ---------- */
+function setTool(next){
+  tool = next; store.set("muse.tool",tool);
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.tool === tool));
+  $("form-prompt").hidden = tool !== "prompt";
+  $("form-caption").hidden = tool !== "caption";
+  showEmpty(); $("note").textContent = "";
+}
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => setTool(b.dataset.tool));
+document.querySelectorAll(".chips").forEach(g => g.addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  g.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === c));
+}));
+
+/* ---------- 4b. CHANNEL + FORMAT ---------- */
+function renderChannels(){
+  const t = T[lang];
+  $("chanChips").innerHTML = Object.keys(CH).map(c =>
+    `<button type="button" class="chip" data-v="${c}" aria-pressed="${c===channel}">${c}</button>`).join("");
+  $("fmtChips").innerHTML = CH[channel].formats.map(f =>
+    `<button type="button" class="chip" data-v="${f.k}" aria-pressed="${f.k===fmt().k}">${f[lang]}</button>`).join("");
+  const f = fmt(), c = CH[channel];
+  $("spec").innerHTML =
+    `<span>${t.sRatio} <b>${f.ratio}</b></span>` +
+    (f.len ? `<span>${t.sLen} <b>${f.len}</b></span>` : "") +
+    `<span>${t.sCap} <b>≤ ${c.limit.toLocaleString("en")}</b> ${t.chars}</span>` +
+    `<span>${t.sTags} <b>${c.tags}</b></span>`;
+}
+function applyFormat(){
+  const f = fmt(); format = f.k;
+  store.set("muse.chan",channel); store.set("muse.fmt",format);
+  $("pRatio").value = f.ratio === "16:9" || f.ratio === "1:1" || f.ratio === "4:5" ? f.ratio : "9:16";
+  // video formats -> Video AI, still formats -> Image AI (unless Chat AI is picked)
+  if (chip("pTarget") !== "chat") {
+    const want = f.video ? "video" : "image";
+    document.querySelectorAll('[data-group="pTarget"] .chip').forEach(x => x.setAttribute("aria-pressed", x.dataset.v === want));
+  }
+  renderChannels();
+}
+$("chanChips").addEventListener("click", e => { const c=e.target.closest(".chip"); if(!c) return; channel=c.dataset.v; format=""; applyFormat(); });
+$("fmtChips").addEventListener("click", e => { const c=e.target.closest(".chip"); if(!c) return; format=c.dataset.v; applyFormat(); });
+
+/* ---------- 4c. BRAND KIT ---------- */
+const KIT = {bName:"name", bAud:"aud", bKeys:"keys", bAvoid:"avoid", bVoice:"voice", bVisual:"visual", bEx:"examples"};
+function kitState(){ $("kitState").textContent = Object.values(brand).some(Boolean) ? "● " + T[lang].kitOn : ""; }
+Object.entries(KIT).forEach(([id,k]) => {
+  $(id).value = brand[k] || "";
+  $(id).addEventListener("input", () => { brand[k] = $(id).value.trim(); store.set("muse.brand3",brand); kitState(); });
+});
+$("kitReset").onclick = () => { brand = Object.assign({}, BRAND_DEFAULT, {examples:brand.examples}); store.set("muse.brand3",brand);
+  Object.entries(KIT).forEach(([id,k]) => $(id).value = brand[k] || ""); kitState(); };
+function brandLines(kind, ch){
+  const b = brand, out = [];
+  if (b.voice) out.push(`Tone of voice: ${b.voice}`);
+  if (CH_VOICE[ch]) out.push(CH_VOICE[ch]);
+  if (b.visual && kind === "prompt") out.push(`Visual style to follow: ${b.visual}`);
+  if (b.examples && b.examples.trim()) out.push(`Real posts already published by this brand. Match their tone, wording, length, emoji and hashtag habits closely (do not copy them):\n"""\n${b.examples.trim().slice(0,4000)}\n"""`);
+  if (b.name) out.push(`Brand: ${b.name}.`);
+  if (b.aud) out.push(`Target audience: ${b.aud}.`);
+  if (b.keys) out.push(`Always include: ${b.keys}.`);
+  if (b.avoid) out.push(`Never use these words or ideas: ${b.avoid}.`);
+  return out.join("\n");
+}
+
+const chip = name =>document.querySelector(`[data-group="${name}"] [aria-pressed="true"]`).dataset.v;
+
+/* ---------- 5. READ THE FORMS ---------- */
+function readPrompt(){
+  return { kind:"prompt", channel, format:fmt().en, len:fmt().len, target:chip("pTarget"), idea:$("pIdea").value.trim(),
+    style:EN.styles[$("pStyle").value], mood:EN.moods[$("pMood").value],
+    ratio:$("pRatio").value, detail:EN.details[$("pDetail").value] };
+}
+function readCaption(){
+  return { kind:"caption", platform:channel, format:fmt().en, limit:CH[channel].limit, tagCount:CH[channel].tags, topic:$("cTopic").value.trim(),
+    tone:EN.tones[$("cTone").value], length:EN.lens[$("cLen").value], lang:$("cLang").value,
+    emoji:$("cEmoji").checked, tags:$("cTags").checked, cta:$("cCta").checked };
+}
+
+/* ---------- 6. AI INSTRUCTIONS (edit these to change the output!) ---------- */
+function aiPrompt(r){
+  if (r.kind === "prompt") return `You are an expert prompt engineer.
+Write 3 different, ready-to-paste prompts for a ${r.target === "chat" ? "chat assistant (like Claude or ChatGPT)" : r.target + " generation AI (like Midjourney, Runway, or Sora)"}.
+The content will be posted as a ${r.channel} ${r.format}${r.len ? " (" + r.len + ")" : ""}, so fit that channel's look and viewing habits.
+Idea: ${r.idea}
+${brandLines("prompt", r.channel)}
+Style: ${r.style}. Mood: ${r.mood}. ${r.target !== "chat" ? "Aspect ratio: " + r.ratio + "." : ""} Detail level: ${r.detail}.
+${r.target === "image" ? "Cover subject, setting, lighting, camera/lens, composition, colour palette. End with --ar " + r.ratio + "." : ""}
+${r.target === "video" ? "Describe the shot, camera movement, action over time, lighting and pacing." : ""}
+${r.target === "chat" ? "Give the assistant a role, the task, context, constraints and the output format." : ""}
+Write the prompts in English. Make each variant take a clearly different angle.
+Reply with only JSON: {"items":[{"text":"the prompt","angle":"2-4 word label"}]}`;
+  const langLine = r.lang === "ar" ? "Write in Arabic (natural Saudi-friendly tone)." : r.lang === "both" ? "Write each caption in English, then the Arabic version under it." : "Write in English.";
+  return `You are a social media copywriter.
+Write 3 different captions for a ${r.platform} ${r.format}.
+Post is about: ${r.topic}
+${brandLines("caption", r.platform)}
+Never invent prices, offers, specs or dates that are not in the topic above.
+Each caption must stay under ${r.limit} characters. Open with a strong hook in the first line.
+Tone: ${r.tone}. Length: ${r.length}. ${langLine}
+${r.emoji ? "Use a few fitting emojis." : "No emojis."}
+${r.tags ? "End with " + r.tagCount + " relevant hashtags." : "No hashtags."}
+${r.cta ? "Include a short call to action." : ""}
+${r.platform === "LinkedIn" ? "Keep it professional, use short paragraphs and line breaks." : ""}
+${r.platform === "Snapchat" ? "Keep it very short and casual." : ""}
+${r.platform === "TikTok" ? "Sound native to TikTok: casual, punchy, trend-aware." : ""}
+Follow ${r.platform}'s style. Make each caption take a different angle.
+Reply with only JSON: {"items":[{"text":"the caption","angle":"2-4 word label"}]}`;
+}
+
+/* ---------- 7. BUILT-IN TEMPLATES (used when AI is off) ---------- */
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+const LIB = {
+  light:["golden hour light","soft studio lighting with clean reflections","blue hour city lights","warm desert sunset light","bright natural daylight","dramatic rim light on the bodywork"],
+  cam:["low-angle front three-quarter shot","35mm lens, shallow depth of field","wide establishing shot","close-up detail of the headlights and grille","side profile tracking shot","85mm lens, interior detail with bokeh"],
+  comp:["rule of thirds","centered symmetrical composition","leading lines of the road","negative space for headline text","layered foreground and background"],
+  move:["slow dolly-in to the badge","smooth drone fly-over along the road","low tracking shot beside the wheels","slow-motion 360° orbit","static shot with headlights switching on"],
+  emo:{Friendly:["🚗","✨","🤝"],Professional:["📈","✅","🤝"],Funny:["😄","🚗","🙌"],Inspiring:["🌟","🛣️","✨"],Luxury:["🖤","✨","🔑"],Bold:["🔥","⚡","🏁"]},
+  hook:{Friendly:["Your next car is closer than you think.","Car shopping, made simple."],Professional:["Here's what's new at MY NAGHI.","Proud to share a new milestone."],Funny:["Plot twist: buying a car can be easy.","When the car finds you first."],Inspiring:["Every journey starts with the right car.","Search. Select. Drive."],Luxury:["Crafted for those who notice the details.","Luxury, delivered to your door."],Bold:["Stop scrolling. Start driving.","This is your sign to upgrade."]},
+  hookAr:{Friendly:["سيارتك الجاية أقرب مما تتوقع.","شراء السيارة صار أسهل."],Professional:["الجديد من MY NAGHI.","يسعدنا مشاركتكم إنجازاً جديداً."],Funny:["المفاجأة؟ شراء السيارة صار سهل.","لما السيارة تلقاك قبل لا تدورها."],Inspiring:["كل رحلة تبدأ بالسيارة الصح.","ابحث، اختر، وانطلق."],Luxury:["صُممت لمن يلاحظ التفاصيل.","الفخامة توصلك لباب بيتك."],Bold:["وقّف التمرير وابدأ القيادة.","هذي علامتك عشان تجدد سيارتك."]},
+  cta:["Explore more on MYNAGHI.SA.","Book your test drive today.","Finance online in a few clicks.","Tell us your dream car below."],
+  ctaAr:["اكتشف المزيد على MYNAGHI.SA.","احجز تجربة القيادة اليوم.","موّل سيارتك أونلاين بخطوات بسيطة.","قولوا لنا سيارة أحلامكم بالتعليقات."]
+};
+function local(r){
+  if (r.kind === "prompt"){
+    const s=r.style.toLowerCase(), m=r.mood.toLowerCase();
+    const n = r.detail==="Short"?0:r.detail==="Balanced"?1:2;
+    return shuffle([0,1,2]).map((k,i)=>{
+      if (r.target==="chat") return {angle:["Expert role","Step by step","Creative brief"][i],text:
+        [`Act as an expert ${r.channel} content strategist${brand.name?" for "+brand.name:""}. Help me plan a ${r.channel} ${r.format.toLowerCase()} about: ${r.idea}.${brand.aud?"\nAudience: "+brand.aud+".":""}\nKeep the tone ${m} and the format clear with headings.${n?"\nAsk me 2 clarifying questions first if anything is unclear.":""}`,
+         `Write a script for a ${r.channel} ${r.format.toLowerCase()}${r.len?" ("+r.len+")":""} about: ${r.idea}.\nStart with a 2-second hook, then break it into scenes with on-screen text, explain each in plain language, and finish with a short checklist. Tone: ${m}.`,
+         `You are a creative partner. Brainstorm 10 ${m} ideas for: ${r.idea}.\nFor each, give a one-line pitch, then pick your top 3 and explain why.`][i]};
+      const vertical = r.ratio==="9:16";
+      const parts=[`${r.idea}`, `${s} style`, `${m} mood`, pick(LIB.light)];
+      if (r.target==="video") parts.push(pick(LIB.move), r.len ? `${r.len} ${r.channel} ${r.format.toLowerCase()}, strong hook in the first 2 seconds` : `${r.channel} ${r.format.toLowerCase()}`);
+      else parts.push(pick(LIB.cam), `made for a ${r.channel} ${r.format.toLowerCase()}`);
+      if (vertical) parts.push("vertical framing, subject centered, space at top and bottom for on-screen text");
+      if (n>=1) parts.push(pick(LIB.comp));
+      if (n>=2) parts.push("highly detailed, rich textures, cohesive colour palette, 8k");
+      if (brand.visual) parts.push("clean premium automotive look, car as the hero, warm whites and light sand tones, soft light, no gradients, no grain");
+      return {angle:["Classic","Alternate light","Detailed"][i],text: parts.join(", ") + (r.target==="image"?` --ar ${r.ratio}`:`, ${r.ratio}`)};
+    });
+  }
+  const ar = r.lang==="ar", both = r.lang==="both";
+  const tagWords = r.topic.toLowerCase().replace(/[^\p{L}\s]/gu,"").split(/\s+/).filter(w=>w.length>3 && !["your","with","next","online","from","that","this","have","door","delivered","launching","about"].includes(w)).slice(0,4);
+  return [0,1,2].map(i=>{
+    const e = r.emoji ? " " + pick(LIB.emo[r.tone]) : "";
+    const en = [pick(LIB.hook[r.tone]) + e, r.topic.charAt(0).toUpperCase()+r.topic.slice(1)+"."];
+    const a = [pick(LIB.hookAr[r.tone]) + e, r.topic];
+    if (r.length!=="Short"){ en.push("Over 5,000 cars, transparent pricing and support 24/7."); a.push("أكثر من 5,000 سيارة، أسعار واضحة، ودعم على مدار الساعة."); }
+    if (r.length==="Long"){ en.push("Search, finance and get it delivered, all online."); a.push("ابحث، موّل، واستلمها عند باب بيتك، كل هذا أونلاين."); }
+    if (brand.keys){ en.push(brand.keys); a.push(brand.keys); }
+    
+    if (r.cta){ en.push(pick(LIB.cta)); a.push(pick(LIB.ctaAr)); }
+    if (r.platform==="Snapchat"){ en.length = 2; a.length = 2; } // keep Snapchat short
+    let text = ar ? a.join("\n") : both ? en.join("\n")+"\n\n"+a.join("\n") : en.join("\n");
+    const maxTags = parseInt(String(r.tagCount).split("–")[1]) || 5;
+    const tagList = [...(brand.name?["#"+brand.name.replace(/\s+/g,"")]:[]), ...tagWords.map(w=>"#"+w)].slice(0, maxTags);
+    if (r.tags && tagList.length) text += "\n\n" + tagList.join(" ");
+    return {angle:["Hook first","Story","Direct"][i], text};
+  });
+}
+
+/* ---------- 8. GENERATE ---------- */
+let ctl = null;
+async function generate(r){
+  const t = T[lang];
+  if (!(r.idea || r.topic)) { $("note").textContent = t.needIdea; $("note").className="note err"; return; }
+  last = r; $("note").className="note"; $("note").textContent="";
+  const btn = $("go-"+r.kind); btn.disabled = true;
+  $("results").innerHTML = `<div class="empty thinking">${t.thinking}</div>`;
+  let items, usedAI = false;
+  if (sample){
+    ctl?.abort(); ctl = new AbortController();
+    try {
+      const res = await sample.json(aiPrompt(r), {signal:ctl.signal, cache:false});
+      items = (res.items||[]).filter(x=>x && x.text); usedAI = items.length>0;
+    } catch(e){
+      if (e.code==="cancelled") { btn.disabled=false; return; }
+      if (["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(e.code)) { sample=null; setMode(); }
+      $("note").textContent = t.aiOff;
+    }
+  }
+  if (!sample) {
+    try {
+      const res = await askServer(aiPrompt(r));
+      if (res) { items = (res.items||[]).filter(x=>x && x.text); usedAI = items.length>0; }
+    } catch (e) {
+      if (e === "passcode") { $("gate").hidden = false; $("pass").focus();
+        $("note").textContent = store.get("muse.pass","") ? t.passBad : ""; }
+    }
+  }
+  if (!items || !items.length) items = local(r);
+  render(items, usedAI);
+  history.unshift({kind:r.kind, label:r.idea||r.topic, text:items[0].text, at:Date.now()});
+  history = history.slice(0,8); store.set("muse.hist",history); renderHist();
+  btn.disabled = false;
+}
+
+function render(items){
+  const t = T[lang], box = $("results"); box.innerHTML = "";
+  items.forEach(it => {
+    const c = document.createElement("article"); c.className = "card";
+    const p = document.createElement("p"); p.className="txt"; p.textContent = it.text;
+    p.dir = "auto";
+    const m = document.createElement("div"); m.className="meta";
+    const tag = document.createElement("span"); tag.className="tag"; tag.textContent = it.angle || "";
+    const sp = document.createElement("span"); sp.className="spacer";
+    const b = document.createElement("button"); b.type="button"; b.className="ghost copy"; b.textContent = t.copy;
+    b.onclick = async () => {
+      try { await navigator.clipboard.writeText(it.text); }
+      catch { const r=document.createRange(); r.selectNodeContents(p); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }
+      b.textContent = t.copied; b.classList.add("done");
+      setTimeout(()=>{b.textContent=T[lang].copy;b.classList.remove("done")},1600);
+    };
+    m.append(tag, sp);
+    if (last && last.kind === "caption") {
+      const n = [...it.text].length, lim = last.limit;
+      const cnt = document.createElement("span"); cnt.className = "count" + (n > lim ? " over" : "");
+      cnt.dir = "ltr"; cnt.textContent = `${n.toLocaleString("en")} / ${lim.toLocaleString("en")}`;
+      m.append(cnt);
+    }
+    m.append(b); c.append(p, m); box.append(c);
+  });
+}
+function showEmpty(){
+  const t=T[lang];
+  $("results").innerHTML = `<div class="empty">${tool==="prompt"?t.emptyP:t.emptyC}</div>`;
+}
+function renderHist(){
+  const box=$("hist"); box.innerHTML="";
+  $("histWrap").hidden = !history.length;
+  history.forEach(h=>{
+    const d=document.createElement("div"); d.className="hist-item";
+    const em=document.createElement("em"); em.textContent = h.kind==="prompt"?"P":"C";
+    const s=document.createElement("span"); s.textContent=h.text; s.dir="auto"; s.title=h.text;
+    d.append(em,s); box.append(d);
+  });
+}
+
+$("form-prompt").onsubmit = e => { e.preventDefault(); generate(readPrompt()); };
+$("form-caption").onsubmit = e => { e.preventDefault(); generate(readCaption()); };
+$("again").onclick = () => last ? generate(last) : (tool==="prompt" ? generate(readPrompt()) : generate(readCaption()));
+
+/* ---------- 9. START ---------- */
+applyLang(); applyFormat(); kitState(); setTool(tool);
+// Example so the page isn't blank on first visit
+if (!$("pIdea").value) $("pIdea").value = lang==="ar" ? "سيارة جينيسيس GV80 على طريق صحراوي وقت الغروب" : "a Genesis GV80 on a desert highway at sunset";
+if (!$("cTopic").value) $("cTopic").value = lang==="ar" ? "موّل سيارتك القادمة أونلاين وتوصلك لباب البيت" : "finance your next car online and get it delivered to your door";
+// Turn on AI when running inside Claude (falls back to templates anywhere else)
+if (window.claude?.use) window.claude.use("sample").then(s => { sample = s; setMode(); }).catch(()=>{});
+})();
+</script>
+
+</body>
+</html>
