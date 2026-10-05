@@ -123,6 +123,9 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
 .note{font-size:13px;color:var(--muted);margin:0}
 .err{color:var(--warn)}
 
+.noai{background:var(--accent-soft);border-radius:var(--r);padding:16px 18px;display:grid;gap:4px}
+.noai b{font-weight:600}
+.noai p{margin:0;color:var(--fg);font-size:14px}
 .gate{display:grid;gap:8px}
 .gate-row{display:flex;gap:8px}
 .gate-row input{flex:1;min-width:0}
@@ -281,7 +284,12 @@ const T = {
     bKeys:"Always mention",bKeysPh:"e.g. free delivery, #DarBakery",bAvoid:"Never say",bAvoidPh:"e.g. cheap, discount",
     kitNote:"Saved in this browser and added to every prompt and caption.",
     bVoice:"Tone of voice",bVisual:"Visual style",bEx:"Real posts to copy the voice from",bExPh:"Paste 3–5 captions from your TikTok, Instagram and LinkedIn. The AI matches their wording, length and emoji use.",
-    kitReset:"Reset to MY NAGHI voice",passLbl:"Team passcode",unlock:"Unlock AI",passBad:"That passcode didn't work. Ask your team lead for the current one.",
+    kitReset:"Reset to MY NAGHI voice",passLbl:"Team passcode",
+    noAiTitle:"AI isn't connected, so no caption was written.",noAiTag:"Instructions for AI",
+    noAiHow:"Copy the instructions above and paste them into Claude or ChatGPT to get 3 on-brand captions. Once AI is connected, captions appear here directly.",
+    why_none:"This website has no AI helper yet. Deploy the full project from GitHub (with the netlify folder) to turn it on.",
+    why_nokey:"The AI helper is installed but has no API key. Add ANTHROPIC_API_KEY in Netlify, then redeploy.",
+    why_failed:"The AI helper couldn't reach Claude. Check the API key has credit and the model name is right",unlock:"Unlock AI",passBad:"That passcode didn't work. Ask your team lead for the current one.",
     sRatio:"Size",sLen:"Length",sCap:"Caption",sTags:"Hashtags",chars:"chars"},
   ar:{brand:"مركز المحتوى",hello:"ماذا سنصنع اليوم؟",sub:"اختر الأداة، صف فكرتك، واحصل على أوامر ذكاء اصطناعي أو كابشنات جاهزة خلال ثوانٍ.",
     tPrompt:"مولّد البرومبت",tPromptSub:"لأدوات الصور والفيديو والمحادثة",tCaption:"مولّد الكابشن",tCaptionSub:"لمنشوراتك على السوشال ميديا",
@@ -302,7 +310,12 @@ const T = {
     bKeys:"اذكر دائماً",bKeysPh:"مثال: توصيل مجاني، ‎#مخبز_دار",bAvoid:"تجنّب",bAvoidPh:"مثال: رخيص، تخفيض",
     kitNote:"تُحفظ في هذا المتصفح وتُضاف لكل برومبت وكابشن.",
     bVoice:"نبرة الصوت",bVisual:"الهوية البصرية",bEx:"منشورات حقيقية لمحاكاة أسلوبها",bExPh:"الصق ٣–٥ كابشنات من حساباتكم في تيك توك وإنستغرام ولينكدإن، وسيحاكي الذكاء الاصطناعي صياغتها وطولها واستخدامها للإيموجي.",
-    kitReset:"استرجاع نبرة MY NAGHI",passLbl:"رمز الفريق",unlock:"تفعيل الذكاء الاصطناعي",passBad:"الرمز غير صحيح. اطلب الرمز الحالي من مسؤول الفريق.",
+    kitReset:"استرجاع نبرة MY NAGHI",passLbl:"رمز الفريق",
+    noAiTitle:"الذكاء الاصطناعي غير متصل، لذلك لم يُكتب كابشن.",noAiTag:"تعليمات للذكاء الاصطناعي",
+    noAiHow:"انسخ التعليمات أعلاه والصقها في Claude أو ChatGPT للحصول على ٣ كابشنات بنبرة العلامة. بعد ربط الذكاء الاصطناعي ستظهر الكابشنات هنا مباشرة.",
+    why_none:"هذا الموقع لا يحتوي على مساعد الذكاء الاصطناعي بعد. انشر المشروع كاملاً من GitHub (مع مجلد netlify) لتفعيله.",
+    why_nokey:"مساعد الذكاء الاصطناعي مثبت لكن بدون مفتاح API. أضف ANTHROPIC_API_KEY في Netlify ثم أعد النشر.",
+    why_failed:"تعذر الوصول إلى Claude. تأكد من رصيد مفتاح API واسم النموذج",unlock:"تفعيل الذكاء الاصطناعي",passBad:"الرمز غير صحيح. اطلب الرمز الحالي من مسؤول الفريق.",
     sRatio:"المقاس",sLen:"المدة",sCap:"الكابشن",sTags:"هاشتاقات",chars:"حرف"}
 };
 
@@ -381,7 +394,7 @@ function applyLang(){
 }
 $("langBtn").onclick = () => { lang = lang === "ar" ? "en" : "ar"; store.set("muse.lang",lang); applyLang(); };
 
-let serverAI = false;   // true once the website's own AI (/api/generate) has answered
+let serverAI = false, serverIssue = "", serverDetail = "";   // true once the website's own AI (/api/generate) has answered
 function setMode(){
   const t = T[lang], on = !!sample || serverAI;
   $("modeTag").textContent = on ? t.ai : t.local;
@@ -397,9 +410,15 @@ async function askServer(prompt){
   try {
     res = await fetch("/api/generate", {method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({prompt, passcode: store.get("muse.pass","")})});
-  } catch { return null; }
+  } catch { serverIssue = "none"; return null; }
   if (res.status === 401) throw "passcode";
-  if (!res.ok) return null;
+  if (res.status === 404) { serverIssue = "none"; return null; }
+  if (!res.ok) {
+    const j = await res.json().catch(()=>({}));
+    serverIssue = /ANTHROPIC_API_KEY/.test(j.error||"") ? "nokey" : "failed";
+    serverDetail = j.status ? " (" + j.status + ")" : "";
+    return null;
+  }
   const {text} = await res.json().catch(()=>({}));
   if (!text) return null;
   const a = text.indexOf("{"), b = text.lastIndexOf("}");
@@ -499,12 +518,14 @@ ${r.target === "video" ? "Describe the shot, camera movement, action over time, 
 ${r.target === "chat" ? "Give the assistant a role, the task, context, constraints and the output format." : ""}
 Write the prompts in English. Make each variant take a clearly different angle.
 Reply with only JSON: {"items":[{"text":"the prompt","angle":"2-4 word label"}]}`;
-  const langLine = r.lang === "ar" ? "Write in Arabic (natural Saudi-friendly tone)." : r.lang === "both" ? "Write each caption in English, then the Arabic version under it." : "Write in English.";
+  const langLine = r.lang === "ar" ? "Write in Arabic (natural Saudi-friendly tone)." : r.lang === "both" ? "Write each caption in English, then a natural Arabic version under it (written fresh in Arabic, not a word-for-word translation, and every word in Arabic)." : "Write in English.";
   return `You are a social media copywriter.
 Write 3 different captions for a ${r.platform} ${r.format}.
 Post is about: ${r.topic}
 ${brandLines("caption", r.platform)}
-Never invent prices, offers, specs or dates that are not in the topic above.
+Never invent prices, offers, specs, names or dates that are not in the topic above.
+Understand what kind of post this is (for example an employee award, a car launch, an offer, an event, hiring, a milestone or an occasion) and write it the way a skilled social media manager would for that kind of post. Rewrite the topic in your own words; never paste it in as-is. Fix spelling and grammar from the topic (e.g. "sales man" -> "salesperson").
+Hashtags must be meaningful and on-topic (for example #EmployeeOfTheMonth), never single words split out of the topic.
 Each caption must stay under ${r.limit} characters. Open with a strong hook in the first line.
 Tone: ${r.tone}. Length: ${r.length}. ${langLine}
 ${r.emoji ? "Use a few fitting emojis." : "No emojis."}
@@ -600,15 +621,33 @@ async function generate(r){
         $("note").textContent = store.get("muse.pass","") ? t.passBad : ""; }
     }
   }
-  if (!items || !items.length) items = local(r);
+  if (!items || !items.length) {
+    // Without AI, captions and chat prompts can't be written well, so hand over the AI instructions instead.
+    if (r.kind === "caption" || r.target === "chat") {
+      showNoAI(r); btn.disabled = false; return;
+    }
+    items = local(r);
+    $("note").textContent = T[lang]["why_"+(serverIssue||"none")] + serverDetail;
+  }
   render(items, usedAI);
   history.unshift({kind:r.kind, label:r.idea||r.topic, text:items[0].text, at:Date.now()});
   history = history.slice(0,8); store.set("muse.hist",history); renderHist();
   btn.disabled = false;
 }
 
-function render(items){
+function showNoAI(r){
   const t = T[lang], box = $("results"); box.innerHTML = "";
+  const warn = document.createElement("div"); warn.className = "noai";
+  const h = document.createElement("b"); h.textContent = t.noAiTitle;
+  const p = document.createElement("p"); p.textContent = t["why_"+(serverIssue||"none")] + serverDetail;
+  warn.append(h, p); box.append(warn);
+  last = r;
+  render([{text: aiPrompt(r).replace(/Reply with only JSON:[\s\S]*$/, "Give the 3 options numbered 1 to 3, with no extra commentary."), angle: t.noAiTag}], true);
+  box.prepend(warn);
+  $("note").textContent = t.noAiHow;
+}
+function render(items, noCount){
+  const t = T[lang], box = $("results"); if (!noCount) box.innerHTML = ""; else box.querySelectorAll(".card").forEach(c=>c.remove());
   items.forEach(it => {
     const c = document.createElement("article"); c.className = "card";
     const p = document.createElement("p"); p.className="txt"; p.textContent = it.text;
@@ -624,7 +663,7 @@ function render(items){
       setTimeout(()=>{b.textContent=T[lang].copy;b.classList.remove("done")},1600);
     };
     m.append(tag, sp);
-    if (last && last.kind === "caption") {
+    if (last && last.kind === "caption" && !noCount) {
       const n = [...it.text].length, lim = last.limit;
       const cnt = document.createElement("span"); cnt.className = "count" + (n > lim ? " over" : "");
       cnt.dir = "ltr"; cnt.textContent = `${n.toLocaleString("en")} / ${lim.toLocaleString("en")}`;
