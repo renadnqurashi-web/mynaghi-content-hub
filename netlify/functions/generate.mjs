@@ -1,9 +1,10 @@
 // MY NAGHI Content Hub — server-side AI.
 // Runs on Netlify, keeps the Claude API key secret, and checks the team passcode.
-// Settings (Netlify > Site configuration > Environment variables):
-//   ANTHROPIC_API_KEY  required  your key from console.anthropic.com
-//   TEAM_PASSCODE      optional  if set, people must enter it before AI works
-//   CLAUDE_MODEL       optional  model name, see docs.claude.com/en/docs/about-claude/models
+// Settings (Netlify > Project configuration > Environment variables):
+//   ANTHROPIC_API_KEY   required  your key from console.anthropic.com (starts with sk-ant-)
+//   TEAM_PASSCODE       optional  if set, people must enter it before AI works
+//   CLAUDE_MODEL        optional  "Best quality" model (default claude-sonnet-5-5)
+//   CLAUDE_MODEL_FAST   optional  "Fast" model (default claude-haiku-4-5-20251001)
 
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "Use POST" }, 405);
@@ -18,16 +19,20 @@ export default async (req) => {
   if (!prompt) return json({ error: "Empty prompt" }, 400);
   if (!process.env.ANTHROPIC_API_KEY) return json({ error: "Missing ANTHROPIC_API_KEY" }, 500);
 
+  const model = body.quality === "best"
+    ? (process.env.CLAUDE_MODEL || "claude-sonnet-5-5")
+    : (process.env.CLAUDE_MODEL_FAST || "claude-haiku-4-5-20251001");
+
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
-      "x-api-key": process.env.ANTHROPIC_API_KEY,
+      "x-api-key": process.env.ANTHROPIC_API_KEY.trim(),
       "anthropic-version": "2023-06-01",
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.CLAUDE_MODEL || "claude-sonnet-4-5",
-      max_tokens: 2000,
+      model,
+      max_tokens: 4000,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -35,7 +40,7 @@ export default async (req) => {
   if (!r.ok) return json({ error: "AI request failed", status: r.status, detail: await r.text() }, 502);
   const data = await r.json();
   const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
-  return json({ text });
+  return json({ text, model });
 };
 
 const json = (obj, status = 200) =>

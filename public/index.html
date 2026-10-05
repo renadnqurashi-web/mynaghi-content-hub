@@ -93,6 +93,8 @@ input[type=text],textarea,select{width:100%;background:var(--sunk);border:1.5px 
 textarea{resize:vertical;min-height:80px;line-height:1.5}
 input:focus,textarea:focus,select:focus{border-color:var(--accent);outline:none;background:var(--surface)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.car-row{grid-template-columns:1.2fr 1.2fr .8fr}
+@media (max-width:420px){.car-row{grid-template-columns:1fr 1fr}.car-row .field:first-child{grid-column:1/-1}}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1.5px solid var(--line);background:var(--surface);border-radius:9999px;padding:7px 16px;font-size:14px;font-weight:500;cursor:pointer}
 .chip:hover{border-color:var(--fg)}
@@ -172,6 +174,11 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
         <div class="chips" id="chanChips"></div></div>
       <div class="field"><span class="lbl" data-t="fmt"></span>
         <div class="chips" id="fmtChips"></div></div>
+      <div class="field"><span class="lbl" data-t="speed"></span>
+        <div class="chips" data-group="quality">
+          <button type="button" class="chip" data-v="fast" aria-pressed="true" data-t="fast"></button>
+          <button type="button" class="chip" data-v="best" aria-pressed="false" data-t="best"></button>
+        </div></div>
     </div>
     <p class="spec" id="spec"></p>
     <details class="kit" id="kit">
@@ -201,6 +208,14 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
           <button type="button" class="chip" data-v="video" aria-pressed="false" data-t="video"></button>
           <button type="button" class="chip" data-v="chat" aria-pressed="false" data-t="chat"></button>
         </div>
+      </div>
+      <div class="row car-row">
+        <div class="field"><label for="pMake" data-t="pMake"></label>
+          <select id="pMake"></select></div>
+        <div class="field"><label for="pModel" data-t="pModel"></label>
+          <input type="text" id="pModel" list="modelList" data-ph="pModelPh" autocomplete="off"><datalist id="modelList"></datalist></div>
+        <div class="field"><label for="pYear" data-t="pYear"></label>
+          <select id="pYear"></select></div>
       </div>
       <div class="field"><label for="pIdea" data-t="pIdea"></label>
         <textarea id="pIdea" data-ph="pIdeaPh"></textarea></div>
@@ -268,6 +283,7 @@ const T = {
   en:{brand:"Content Hub",hello:"What are we making today?",sub:"Pick a tool, describe your idea, and get ready-to-use AI prompts or social captions in seconds.",
     tPrompt:"Prompt Generator",tPromptSub:"For image, video and chat AI",tCaption:"Caption Generator",tCaptionSub:"For your social posts",
     pFor:"Prompt for",image:"Image AI",video:"Video AI",chat:"Chat AI",pIdea:"Your idea",pIdeaPh:"e.g. a cozy coffee shop in Jeddah at sunset",
+    pMake:"Car make",pModel:"Model",pModelPh:"e.g. GV80",pYear:"Year",anyCar:"Let AI pick",speed:"Speed",fast:"Fast",best:"Best quality",sec:"s",
     pStyle:"Style",pMood:"Mood",pRatio:"Aspect ratio",pDetail:"Detail",
     cPlat:"Platform",cTopic:"What's the post about?",cTopicPh:"e.g. launching our new date-filled cookies for National Day",
     cTone:"Tone",cLen:"Length",cLang:"Caption language",emoji:"Emojis",tags:"Hashtags",cta:"Call to action",
@@ -294,6 +310,7 @@ const T = {
   ar:{brand:"مركز المحتوى",hello:"ماذا سنصنع اليوم؟",sub:"اختر الأداة، صف فكرتك، واحصل على أوامر ذكاء اصطناعي أو كابشنات جاهزة خلال ثوانٍ.",
     tPrompt:"مولّد البرومبت",tPromptSub:"لأدوات الصور والفيديو والمحادثة",tCaption:"مولّد الكابشن",tCaptionSub:"لمنشوراتك على السوشال ميديا",
     pFor:"البرومبت لـ",image:"صور",video:"فيديو",chat:"محادثة",pIdea:"فكرتك",pIdeaPh:"مثال: مقهى دافئ في جدة وقت الغروب",
+    pMake:"العلامة",pModel:"الموديل",pModelPh:"مثال: GV80",pYear:"السنة",anyCar:"يختار الذكاء الاصطناعي",speed:"السرعة",fast:"سريع",best:"أعلى جودة",sec:"ث",
     pStyle:"الأسلوب",pMood:"الإحساس",pRatio:"المقاس",pDetail:"التفاصيل",
     cPlat:"المنصة",cTopic:"عن ماذا المنشور؟",cTopicPh:"مثال: إطلاق كوكيز التمر الجديد لليوم الوطني",
     cTone:"النبرة",cLen:"الطول",cLang:"لغة الكابشن",emoji:"إيموجي",tags:"هاشتاقات",cta:"دعوة لاتخاذ إجراء",
@@ -369,6 +386,25 @@ const CH_VOICE = {
   LinkedIn:"LinkedIn: corporate and professional, English or formal Arabic, talk about milestones, partnerships, digital transformation and Vision 2030, no slang, minimal emojis.",
   Snapchat:"Snapchat: very short, friendly and casual, Arabic-first."
 };
+/* ---------- 1d. CARS (brands MY NAGHI sells; models are suggestions, any name can be typed) ---------- */
+const CARS = {
+  "BMW":["X1","X3","X5","X6","X7","XM","3 Series","5 Series","7 Series","i5","i7","iX","M3","M5"],
+  "MINI":["Cooper","Countryman","Aceman"],
+  "Rolls-Royce":["Phantom","Ghost","Cullinan","Spectre"],
+  "Genesis":["G70","G80","G90","GV60","GV70","GV80"],
+  "Infiniti":["QX50","QX55","QX60","QX80"],
+  "Lincoln":["Corsair","Nautilus","Aviator","Navigator"],
+  "MG":["MG5","MG GT","MG7","ZS","HS","RX5","RX8"],
+  "Ford":["Territory","Explorer","Expedition","Everest","Bronco","Mustang","Taurus","F-150","Ranger"],
+  "Nissan":["Sunny","Altima","Kicks","X-Trail","Pathfinder","Patrol","Navara"],
+  "Hyundai":["Accent","Elantra","Sonata","Creta","Tucson","Santa Fe","Palisade","Staria"],
+  "Jaguar":["F-Pace","E-Pace"],
+  "Range Rover":["Range Rover","Range Rover Sport","Range Rover Velar","Range Rover Evoque"],
+  "Defender":["Defender 90","Defender 110","Defender 130","Defender OCTA"],
+  "Discovery":["Discovery","Discovery Sport"]
+};
+// Latest model year: new model years launch mid-year, so from June onward use next year
+const NOW = new Date(), LATEST_YEAR = NOW.getFullYear() + (NOW.getMonth() >= 5 ? 1 : 0);
 let brand = Object.assign({}, BRAND_DEFAULT, store.get("muse.brand3",{}));
 const fmt = () => CH[channel].formats.find(f=>f.k===format) || CH[channel].formats[0];
 let sample = null;      // set when AI becomes available
@@ -388,7 +424,7 @@ function applyLang(){
     sel.selectedIndex = i;
   });
   $("langBtn").textContent = lang === "ar" ? "EN" : "ع";
-  setMode(); renderChannels(); kitState();
+  setMode(); renderChannels(); kitState(); renderCars();
   if (!$("results").children.length || $("results").querySelector(".empty")) showEmpty();
   renderHist();
 }
@@ -409,7 +445,7 @@ async function askServer(prompt){
   let res;
   try {
     res = await fetch("/api/generate", {method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({prompt, passcode: store.get("muse.pass","")})});
+      body: JSON.stringify({prompt, quality, passcode: store.get("muse.pass","")})});
   } catch { serverIssue = "none"; return null; }
   if (res.status === 401) throw "passcode";
   if (res.status === 404) { serverIssue = "none"; return null; }
@@ -469,6 +505,19 @@ function applyFormat(){
 $("chanChips").addEventListener("click", e => { const c=e.target.closest(".chip"); if(!c) return; channel=c.dataset.v; format=""; applyFormat(); });
 $("fmtChips").addEventListener("click", e => { const c=e.target.closest(".chip"); if(!c) return; format=c.dataset.v; applyFormat(); });
 
+/* ---------- 4b2. CAR PICKER ---------- */
+function renderCars(){
+  const t = T[lang], mk = $("pMake").value || store.get("muse.make","");
+  $("pMake").innerHTML = `<option value="">${t.anyCar}</option>` + Object.keys(CARS).map(b=>`<option${b===mk?" selected":""}>${b}</option>`).join("");
+  const yr = $("pYear").value || String(LATEST_YEAR);
+  $("pYear").innerHTML = [LATEST_YEAR, LATEST_YEAR-1, LATEST_YEAR-2].map(y=>`<option${String(y)===yr?" selected":""}>${y}</option>`).join("");
+  $("modelList").innerHTML = (CARS[mk]||[]).map(m=>`<option value="${m}">`).join("");
+}
+$("pMake").addEventListener("change", () => { store.set("muse.make",$("pMake").value); $("pModel").value=""; renderCars(); });
+let quality = store.get("muse.quality","fast");
+document.querySelectorAll('[data-group="quality"] .chip').forEach(x=>x.setAttribute("aria-pressed", x.dataset.v===quality));
+document.querySelector('[data-group="quality"]').addEventListener("click", e => { const c=e.target.closest(".chip"); if(c){ quality=c.dataset.v; store.set("muse.quality",quality);} });
+
 /* ---------- 4c. BRAND KIT ---------- */
 const KIT = {bName:"name", bAud:"aud", bKeys:"keys", bAvoid:"avoid", bVoice:"voice", bVisual:"visual", bEx:"examples"};
 function kitState(){ $("kitState").textContent = Object.values(brand).some(Boolean) ? "● " + T[lang].kitOn : ""; }
@@ -496,6 +545,7 @@ const chip = name =>document.querySelector(`[data-group="${name}"] [aria-pressed
 /* ---------- 5. READ THE FORMS ---------- */
 function readPrompt(){
   return { kind:"prompt", channel, format:fmt().en, len:fmt().len, target:chip("pTarget"), idea:$("pIdea").value.trim(),
+    make:$("pMake").value, model:$("pModel").value.trim(), year:$("pYear").value || String(LATEST_YEAR),
     style:EN.styles[$("pStyle").value], mood:EN.moods[$("pMood").value],
     ratio:$("pRatio").value, detail:EN.details[$("pDetail").value] };
 }
@@ -511,6 +561,9 @@ function aiPrompt(r){
 Write 3 different, ready-to-paste prompts for a ${r.target === "chat" ? "chat assistant (like Claude or ChatGPT)" : r.target + " generation AI (like Midjourney, Runway, or Sora)"}.
 The content will be posted as a ${r.channel} ${r.format}${r.len ? " (" + r.len + ")" : ""}, so fit that channel's look and viewing habits.
 Idea: ${r.idea}
+${r.make ? `Car: the ${r.year} ${r.make} ${r.model || "(pick the most fitting current model from this brand)"}.
+Every prompt must name the exact make, model and model year (e.g. "${r.year} ${r.make} ${r.model || "<model>"}") and show the latest generation and newest facelift of that model, never an older design.` : `Pick ONE specific, real car from these brands that fits the idea: ${Object.keys(CARS).join(", ")}. Use its latest model year (${r.year}). Every prompt must name that exact make, model and model year, and show the latest generation and newest facelift, never an older design.`}
+Only describe design details you are confident are correct for that model year; do not invent features.
 ${brandLines("prompt", r.channel)}
 Style: ${r.style}. Mood: ${r.mood}. ${r.target !== "chat" ? "Aspect ratio: " + r.ratio + "." : ""} Detail level: ${r.detail}.
 ${r.target === "image" ? "Cover subject, setting, lighting, camera/lens, composition, colour palette. End with --ar " + r.ratio + "." : ""}
@@ -522,6 +575,7 @@ Reply with only JSON: {"items":[{"text":"the prompt","angle":"2-4 word label"}]}
   return `You are a social media copywriter.
 Write 3 different captions for a ${r.platform} ${r.format}.
 Post is about: ${r.topic}
+If a car is mentioned, always use its exact make and model name, and the latest model year (${LATEST_YEAR}) unless the topic says another year.
 ${brandLines("caption", r.platform)}
 Never invent prices, offers, specs, names or dates that are not in the topic above.
 Understand what kind of post this is (for example an employee award, a car launch, an offer, an event, hiring, a milestone or an occasion) and write it the way a skilled social media manager would for that kind of post. Rewrite the topic in your own words; never paste it in as-is. Fix spelling and grammar from the topic (e.g. "sales man" -> "salesperson").
@@ -562,7 +616,8 @@ function local(r){
          `Write a script for a ${r.channel} ${r.format.toLowerCase()}${r.len?" ("+r.len+")":""} about: ${r.idea}.\nStart with a 2-second hook, then break it into scenes with on-screen text, explain each in plain language, and finish with a short checklist. Tone: ${m}.`,
          `You are a creative partner. Brainstorm 10 ${m} ideas for: ${r.idea}.\nFor each, give a one-line pitch, then pick your top 3 and explain why.`][i]};
       const vertical = r.ratio==="9:16";
-      const parts=[`${r.idea}`, `${s} style`, `${m} mood`, pick(LIB.light)];
+      const car = `${r.year} ${r.make || "Genesis"} ${r.model || (r.make ? CARS[r.make][0] : "GV80")}`;
+      const parts=[`${car}, ${r.idea}`, `${s} style`, `${m} mood`, pick(LIB.light)];
       if (r.target==="video") parts.push(pick(LIB.move), r.len ? `${r.len} ${r.channel} ${r.format.toLowerCase()}, strong hook in the first 2 seconds` : `${r.channel} ${r.format.toLowerCase()}`);
       else parts.push(pick(LIB.cam), `made for a ${r.channel} ${r.format.toLowerCase()}`);
       if (vertical) parts.push("vertical framing, subject centered, space at top and bottom for on-screen text");
@@ -599,12 +654,14 @@ async function generate(r){
   if (!(r.idea || r.topic)) { $("note").textContent = t.needIdea; $("note").className="note err"; return; }
   last = r; $("note").className="note"; $("note").textContent="";
   const btn = $("go-"+r.kind); btn.disabled = true;
-  $("results").innerHTML = `<div class="empty thinking">${t.thinking}</div>`;
+  $("results").innerHTML = `<div class="empty thinking">${t.thinking} <span id="tick">0${t.sec}</span></div>`;
+  const t0 = Date.now(); clearInterval(window.__tick);
+  window.__tick = setInterval(()=>{ const el=$("tick"); if(!el) return clearInterval(window.__tick); el.textContent = Math.round((Date.now()-t0)/1000) + T[lang].sec; }, 1000);
   let items, usedAI = false;
   if (sample){
     ctl?.abort(); ctl = new AbortController();
     try {
-      const res = await sample.json(aiPrompt(r), {signal:ctl.signal, cache:false});
+      const res = await sample.json(aiPrompt(r), {signal:ctl.signal, cache:false, modelTier: quality==="fast" ? "quick" : "default"});
       items = (res.items||[]).filter(x=>x && x.text); usedAI = items.length>0;
     } catch(e){
       if (e.code==="cancelled") { btn.disabled=false; return; }
@@ -629,7 +686,7 @@ async function generate(r){
     items = local(r);
     $("note").textContent = T[lang]["why_"+(serverIssue||"none")] + serverDetail;
   }
-  render(items, usedAI);
+  render(items);
   history.unshift({kind:r.kind, label:r.idea||r.topic, text:items[0].text, at:Date.now()});
   history = history.slice(0,8); store.set("muse.hist",history); renderHist();
   btn.disabled = false;
@@ -692,9 +749,11 @@ $("form-caption").onsubmit = e => { e.preventDefault(); generate(readCaption());
 $("again").onclick = () => last ? generate(last) : (tool==="prompt" ? generate(readPrompt()) : generate(readCaption()));
 
 /* ---------- 9. START ---------- */
+if (!store.get("muse.make","")) { store.set("muse.make","Genesis"); }
 applyLang(); applyFormat(); kitState(); setTool(tool);
+if (!$("pModel").value && $("pMake").value==="Genesis") $("pModel").value = "GV80";
 // Example so the page isn't blank on first visit
-if (!$("pIdea").value) $("pIdea").value = lang==="ar" ? "سيارة جينيسيس GV80 على طريق صحراوي وقت الغروب" : "a Genesis GV80 on a desert highway at sunset";
+if (!$("pIdea").value) $("pIdea").value = lang==="ar" ? "تسير على طريق صحراوي وقت الغروب" : "driving on a desert highway at sunset";
 if (!$("cTopic").value) $("cTopic").value = lang==="ar" ? "موّل سيارتك القادمة أونلاين وتوصلك لباب البيت" : "finance your next car online and get it delivered to your door";
 // Turn on AI when running inside Claude (falls back to templates anywhere else)
 if (window.claude?.use) window.claude.use("sample").then(s => { sample = s; setMode(); }).catch(()=>{});
