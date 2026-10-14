@@ -209,7 +209,15 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
           <button type="button" class="chip" data-v="chat" aria-pressed="false" data-t="chat"></button>
         </div>
       </div>
-      <div class="row car-row">
+      <div class="field"><span class="lbl" data-t="carType"></span>
+        <div class="chips" data-group="carType">
+          <button type="button" class="chip" data-v="luxury" aria-pressed="true" data-t="ctLuxury"></button>
+          <button type="button" class="chip" data-v="mainstream" aria-pressed="false" data-t="ctMain"></button>
+          <button type="button" class="chip" data-v="used" aria-pressed="false" data-t="ctUsed"></button>
+          <button type="button" class="chip" data-v="none" aria-pressed="false" data-t="ctNone"></button>
+        </div>
+      </div>
+      <div class="row car-row" id="carFields">
         <div class="field"><label for="pMake" data-t="pMake"></label>
           <select id="pMake"></select></div>
         <div class="field"><label for="pModel" data-t="pModel"></label>
@@ -283,7 +291,7 @@ const T = {
   en:{brand:"Content Hub",hello:"What are we making today?",sub:"Pick a tool, describe your idea, and get ready-to-use AI prompts or social captions in seconds.",
     tPrompt:"Prompt Generator",tPromptSub:"For image, video and chat AI",tCaption:"Caption Generator",tCaptionSub:"For your social posts",
     pFor:"Prompt for",image:"Image AI",video:"Video AI",chat:"Chat AI",pIdea:"Your idea",pIdeaPh:"e.g. a cozy coffee shop in Jeddah at sunset",
-    pMake:"Car make",pModel:"Model",pModelPh:"e.g. GV80",pYear:"Year",anyCar:"Let AI pick",speed:"Speed",fast:"Fast",best:"Best quality",sec:"s",
+    carType:"Car type",ctLuxury:"Luxury",ctMain:"Mainstream",ctUsed:"Used",ctNone:"No car",pMake:"Car make",pModel:"Model",pModelPh:"e.g. GV80",pYear:"Year",anyCar:"Let AI pick",speed:"Speed",fast:"Fast",best:"Best quality",sec:"s",
     pStyle:"Style",pMood:"Mood",pRatio:"Aspect ratio",pDetail:"Detail",
     cPlat:"Platform",cTopic:"What's the post about?",cTopicPh:"e.g. launching our new date-filled cookies for National Day",
     cTone:"Tone",cLen:"Length",cLang:"Caption language",emoji:"Emojis",tags:"Hashtags",cta:"Call to action",
@@ -310,7 +318,7 @@ const T = {
   ar:{brand:"مركز المحتوى",hello:"ماذا سنصنع اليوم؟",sub:"اختر الأداة، صف فكرتك، واحصل على أوامر ذكاء اصطناعي أو كابشنات جاهزة خلال ثوانٍ.",
     tPrompt:"مولّد البرومبت",tPromptSub:"لأدوات الصور والفيديو والمحادثة",tCaption:"مولّد الكابشن",tCaptionSub:"لمنشوراتك على السوشال ميديا",
     pFor:"البرومبت لـ",image:"صور",video:"فيديو",chat:"محادثة",pIdea:"فكرتك",pIdeaPh:"مثال: مقهى دافئ في جدة وقت الغروب",
-    pMake:"العلامة",pModel:"الموديل",pModelPh:"مثال: GV80",pYear:"السنة",anyCar:"يختار الذكاء الاصطناعي",speed:"السرعة",fast:"سريع",best:"أعلى جودة",sec:"ث",
+    carType:"فئة السيارة",ctLuxury:"فاخرة",ctMain:"اقتصادية",ctUsed:"مستعملة",ctNone:"بدون سيارة",pMake:"العلامة",pModel:"الموديل",pModelPh:"مثال: GV80",pYear:"السنة",anyCar:"يختار الذكاء الاصطناعي",speed:"السرعة",fast:"سريع",best:"أعلى جودة",sec:"ث",
     pStyle:"الأسلوب",pMood:"الإحساس",pRatio:"المقاس",pDetail:"التفاصيل",
     cPlat:"المنصة",cTopic:"عن ماذا المنشور؟",cTopicPh:"مثال: إطلاق كوكيز التمر الجديد لليوم الوطني",
     cTone:"النبرة",cLen:"الطول",cLang:"لغة الكابشن",emoji:"إيموجي",tags:"هاشتاقات",cta:"دعوة لاتخاذ إجراء",
@@ -402,6 +410,11 @@ const CARS = {
   "Range Rover":["Range Rover","Range Rover Sport","Range Rover Velar","Range Rover Evoque"],
   "Defender":["Defender 90","Defender 110","Defender 130","Defender OCTA"],
   "Discovery":["Discovery","Discovery Sport"]
+};
+// Which brands count as Luxury and Mainstream (move a brand between lists to change it)
+const SEGMENTS = {
+  luxury: ["Rolls-Royce","BMW","Genesis","Range Rover","Defender","Discovery","Jaguar","Lincoln","Infiniti","MINI"],
+  mainstream: ["Hyundai","Nissan","Ford","MG"]
 };
 // Latest model year: new model years launch mid-year, so from June onward use next year
 const NOW = new Date(), LATEST_YEAR = NOW.getFullYear() + (NOW.getMonth() >= 5 ? 1 : 0);
@@ -553,13 +566,29 @@ $("chanChips").addEventListener("click", e => { const c=e.target.closest(".chip"
 $("fmtChips").addEventListener("click", e => { const c=e.target.closest(".chip"); if(!c) return; format=c.dataset.v; applyFormat(); });
 
 /* ---------- 4b2. CAR PICKER ---------- */
+let carType = store.get("muse.carType","luxury");
+const brandsFor = type => SEGMENTS[type] || Object.keys(CARS);
+const yearsFor = type => type === "used"
+  ? Array.from({length:8}, (_, i) => LATEST_YEAR - 1 - i)      // used: last 8 model years
+  : [LATEST_YEAR, LATEST_YEAR - 1];                             // new: latest first
 function renderCars(){
-  const t = T[lang], mk = $("pMake").value || store.get("muse.make","");
-  $("pMake").innerHTML = `<option value="">${t.anyCar}</option>` + Object.keys(CARS).map(b=>`<option${b===mk?" selected":""}>${b}</option>`).join("");
-  const yr = $("pYear").value || String(LATEST_YEAR);
-  $("pYear").innerHTML = [LATEST_YEAR, LATEST_YEAR-1, LATEST_YEAR-2].map(y=>`<option${String(y)===yr?" selected":""}>${y}</option>`).join("");
+  const t = T[lang];
+  document.querySelectorAll('[data-group="carType"] .chip').forEach(x => x.setAttribute("aria-pressed", x.dataset.v === carType));
+  $("carFields").hidden = carType === "none";
+  const list = brandsFor(carType);
+  let mk = $("pMake").value || store.get("muse.make","");
+  if (mk && !list.includes(mk)) { mk = ""; $("pModel").value = ""; store.set("muse.make",""); }
+  $("pMake").innerHTML = `<option value="">${t.anyCar}</option>` + list.map(b=>`<option${b===mk?" selected":""}>${b}</option>`).join("");
+  const years = yearsFor(carType);
+  let yr = $("pYear").value;
+  if (!years.map(String).includes(yr)) yr = String(years[0]);
+  $("pYear").innerHTML = years.map(y=>`<option${String(y)===yr?" selected":""}>${y}</option>`).join("");
   $("modelList").innerHTML = (CARS[mk]||[]).map(m=>`<option value="${m}">`).join("");
 }
+document.querySelector('[data-group="carType"]').addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  carType = c.dataset.v; store.set("muse.carType", carType); $("pYear").value = ""; renderCars();
+});
 $("pMake").addEventListener("change", () => { store.set("muse.make",$("pMake").value); $("pModel").value=""; renderCars(); });
 let quality = store.get("muse.quality","fast");
 document.querySelectorAll('[data-group="quality"] .chip').forEach(x=>x.setAttribute("aria-pressed", x.dataset.v===quality));
@@ -592,7 +621,8 @@ const chip = name =>document.querySelector(`[data-group="${name}"] [aria-pressed
 /* ---------- 5. READ THE FORMS ---------- */
 function readPrompt(){
   return { kind:"prompt", channel, format:fmt().en, len:fmt().len, target:chip("pTarget"), idea:$("pIdea").value.trim(),
-    make:$("pMake").value, model:$("pModel").value.trim(), year:$("pYear").value || String(LATEST_YEAR),
+    carType, make: carType==="none" ? "" : $("pMake").value, model: carType==="none" ? "" : $("pModel").value.trim(),
+    year: $("pYear").value || String(yearsFor(carType)[0]),
     style:EN.styles[$("pStyle").value], mood:EN.moods[$("pMood").value],
     ratio:$("pRatio").value, detail:EN.details[$("pDetail").value] };
 }
@@ -618,9 +648,7 @@ Nothing before, between or after. No markdown, no bold, no "---" separators, no 
 Write 3 different, ready-to-paste prompts for a ${r.target === "chat" ? "chat assistant (like Claude or ChatGPT)" : r.target + " generation AI (like Midjourney, Runway, or Sora)"}.
 The content will be posted as a ${r.channel} ${r.format}${r.len ? " (" + r.len + ")" : ""}, so fit that channel's look and viewing habits.
 Idea: ${r.idea}
-${r.make ? `Car: the ${r.year} ${r.make} ${r.model || "(pick the most fitting current model from this brand)"}.
-Every prompt must name the exact make, model and model year (e.g. "${r.year} ${r.make} ${r.model || "<model>"}") and show the latest generation and newest facelift of that model, never an older design.` : `Pick ONE specific, real car from these brands that fits the idea: ${Object.keys(CARS).join(", ")}. Use its latest model year (${r.year}). Every prompt must name that exact make, model and model year, and show the latest generation and newest facelift, never an older design.`}
-Only describe design details you are confident are correct for that model year; do not invent features.
+${carBlock(r)}
 ${brandLines("prompt", r.channel)}
 Style: ${r.style}. Mood: ${r.mood}. ${r.target !== "chat" ? "Aspect ratio: " + r.ratio + "." : ""} Detail level: ${r.detail}${r.detail === "Short" ? " (one sentence, under 40 words)" : r.detail === "Balanced" ? " (under 80 words)" : " (under 150 words)"}.
 ${r.target === "image" ? "Cover subject, setting, lighting, camera/lens, composition, colour palette. End with --ar " + r.ratio + "." : ""}
@@ -670,6 +698,26 @@ Make the three captions take clearly different angles.
 ${FORMAT}`;
 }
 
+// The car part of the prompt instructions, by car type
+function carBlock(r){
+  if (r.carType === "none") return `No car: do not show, mention or hint at any vehicle. Focus entirely on the idea (people, places, moments, the brand mood).`;
+  const pool = brandsFor(r.carType).join(", ");
+  const named = r.make
+    ? `${r.year} ${r.make} ${r.model || "(pick the most fitting model from this brand)"}`
+    : `${r.year} car. Pick ONE specific, real model from these brands that fits the idea: ${pool}`;
+  const rule = `Every prompt must name the exact make, model and model year. Only describe design details you are confident are correct for that model year; do not invent features.`;
+  if (r.carType === "used") return `Car: a pre-owned ${named}.
+Show it as a well-kept, certified pre-owned car: spotless, honest and realistic, with a trustworthy dealership feel. Show the design of that model year's generation, not a newer facelift. Never make it look worn or cheap.
+${rule}`;
+  const feel = r.carType === "luxury"
+    ? "Luxury segment: aspirational, refined, exclusive settings, crafted details, calm confidence."
+    : "Mainstream segment: relatable and real, everyday Saudi life, families and young professionals, practical value without looking cheap.";
+  return `Car: a brand-new ${named}.
+${feel}
+Show the latest generation and newest facelift of that model, never an older design.
+${rule}`;
+}
+
 // Split "### label" sections into cards (works on partial text while streaming)
 function parseSections(text){
   const parts = ("\n" + text).split(/\n\s*#{2,3}\s*/).slice(1);
@@ -705,8 +753,9 @@ function local(r){
          `Write a script for a ${r.channel} ${r.format.toLowerCase()}${r.len?" ("+r.len+")":""} about: ${r.idea}.\nStart with a 2-second hook, then break it into scenes with on-screen text, explain each in plain language, and finish with a short checklist. Tone: ${m}.`,
          `You are a creative partner. Brainstorm 10 ${m} ideas for: ${r.idea}.\nFor each, give a one-line pitch, then pick your top 3 and explain why.`][i]};
       const vertical = r.ratio==="9:16";
-      const car = `${r.year} ${r.make || "Genesis"} ${r.model || (r.make ? CARS[r.make][0] : "GV80")}`;
-      const parts=[`${car}, ${r.idea}`, `${s} style`, `${m} mood`, pick(LIB.light)];
+      const def = r.carType === "mainstream" ? ["Hyundai","Tucson"] : ["Genesis","GV80"];
+      const car = r.carType === "none" ? "" : `${r.carType === "used" ? "certified pre-owned " : ""}${r.year} ${r.make || def[0]} ${r.model || (r.make ? CARS[r.make][0] : def[1])}, `;
+      const parts=[`${car}${r.idea}`, `${s} style`, `${m} mood`, pick(LIB.light)];
       if (r.target==="video") parts.push(pick(LIB.move), r.len ? `${r.len} ${r.channel} ${r.format.toLowerCase()}, strong hook in the first 2 seconds` : `${r.channel} ${r.format.toLowerCase()}`);
       else parts.push(pick(LIB.cam), `made for a ${r.channel} ${r.format.toLowerCase()}`);
       if (vertical) parts.push("vertical framing, subject centered, space at top and bottom for on-screen text");
