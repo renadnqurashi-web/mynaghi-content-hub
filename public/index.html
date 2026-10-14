@@ -262,12 +262,12 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
         <span class="mode" id="modeTag"></span>
         <button class="ghost" id="again" type="button" data-t="again"></button>
       </div>
-      <div class="results" id="results"></div>
-      <p class="note" id="note"></p>
       <form class="gate" id="gate" hidden>
         <label for="pass" class="lbl" data-t="passLbl"></label>
         <div class="gate-row"><input type="text" id="pass" autocomplete="off"><button class="ghost" type="submit" data-t="unlock"></button></div>
       </form>
+      <div class="results" id="results"></div>
+      <p class="note" id="note"></p>
       <div class="field" id="histWrap" hidden>
         <span class="lbl" data-t="recent"></span>
         <div class="hist" id="hist"></div>
@@ -300,7 +300,7 @@ const T = {
     bKeys:"Always mention",bKeysPh:"e.g. free delivery, #DarBakery",bAvoid:"Never say",bAvoidPh:"e.g. cheap, discount",
     kitNote:"Saved in this browser and added to every prompt and caption.",
     bVoice:"Tone of voice",bVisual:"Visual style",bEx:"Real posts to copy the voice from",bExPh:"Paste 3–5 captions from your TikTok, Instagram and LinkedIn. The AI matches their wording, length and emoji use.",
-    kitReset:"Reset to MY NAGHI voice",passLbl:"Team passcode",
+    kitReset:"Reset to MY NAGHI voice",passLbl:"Team passcode",passAsk:"Enter the team passcode above, then click Unlock AI.",
     noAiTitle:"AI isn't connected, so no caption was written.",noAiTag:"Instructions for AI",
     noAiHow:"Copy the instructions above and paste them into Claude or ChatGPT to get 3 on-brand captions. Once AI is connected, captions appear here directly.",
     why_none:"This website has no AI helper yet. Deploy the full project from GitHub (with the netlify folder) to turn it on.",
@@ -327,7 +327,7 @@ const T = {
     bKeys:"اذكر دائماً",bKeysPh:"مثال: توصيل مجاني، ‎#مخبز_دار",bAvoid:"تجنّب",bAvoidPh:"مثال: رخيص، تخفيض",
     kitNote:"تُحفظ في هذا المتصفح وتُضاف لكل برومبت وكابشن.",
     bVoice:"نبرة الصوت",bVisual:"الهوية البصرية",bEx:"منشورات حقيقية لمحاكاة أسلوبها",bExPh:"الصق ٣–٥ كابشنات من حساباتكم في تيك توك وإنستغرام ولينكدإن، وسيحاكي الذكاء الاصطناعي صياغتها وطولها واستخدامها للإيموجي.",
-    kitReset:"استرجاع نبرة MY NAGHI",passLbl:"رمز الفريق",
+    kitReset:"استرجاع نبرة MY NAGHI",passLbl:"رمز الفريق",passAsk:"أدخل رمز الفريق أعلاه ثم اضغط تفعيل الذكاء الاصطناعي.",
     noAiTitle:"الذكاء الاصطناعي غير متصل، لذلك لم يُكتب كابشن.",noAiTag:"تعليمات للذكاء الاصطناعي",
     noAiHow:"انسخ التعليمات أعلاه والصقها في Claude أو ChatGPT للحصول على ٣ كابشنات بنبرة العلامة. بعد ربط الذكاء الاصطناعي ستظهر الكابشنات هنا مباشرة.",
     why_none:"هذا الموقع لا يحتوي على مساعد الذكاء الاصطناعي بعد. انشر المشروع كاملاً من GitHub (مع مجلد netlify) لتفعيله.",
@@ -375,7 +375,7 @@ const BRAND_DEFAULT = {
   aud:"Car buyers across Saudi Arabia: first-time buyers, families and luxury owners",
   keys:"MYNAGHI.SA",
   avoid:"cheap, hidden fees, exaggerated claims, competitor names, prices or offers that aren't confirmed",
-  voice:"Direct, confident and premium. Warm but composed: approachable, never slangy, never pushy. Short declarative sentences, every word earns its place. Sentence case; always write MY NAGHI in full caps. Use the brand word MY for ownership in campaign lines, as punchy duets like \"MY car. MY way.\" Speak to the customer as \"you\" when talking about the product or service. No emojis unless asked. Warm Saudi hospitality with digital-first convenience. The journey is: Search. Select. Drive. Proof points to use when relevant: 35+ years in the Kingdom, Saudi Arabia's official multi-brand car platform, 5,000+ cars, transparent pricing, online financing, home delivery, 24/7 support. Brands: BMW, MINI, Rolls-Royce, Genesis, Infiniti, Lincoln, MG, Ford, Nissan, Hyundai, Jaguar, Range Rover, Defender, Discovery. Arabic: clear modern Arabic with a light Saudi touch.",
+  voice:"Direct, confident and premium. Warm but composed: approachable, never slangy, never pushy. Short declarative sentences, every word earns its place. Sentence case; always write MY NAGHI in full caps. Use the brand word MY for ownership in campaign lines, as punchy duets like \"MY car. MY way.\" Speak to the customer as \"you\" when talking about the product or service. No emojis unless asked. Warm Saudi hospitality with digital-first convenience. The journey is: Search. Select. Drive. Brand facts (use at most one, only when it fits the topic): 35+ years in the Kingdom, Saudi Arabia's official multi-brand car platform, 5,000+ cars, transparent pricing, online financing, home delivery, 24/7 support. Brands we sell (mention only when the topic is about them): BMW, MINI, Rolls-Royce, Genesis, Infiniti, Lincoln, MG, Ford, Nissan, Hyundai, Jaguar, Range Rover, Defender, Discovery. Arabic: clear modern Arabic with a light Saudi touch.",
   visual:"Premium, clean automotive photography and video. The car is the hero in clean, uncluttered frames with flat, simple backgrounds. Colour vibe: warm whites, light sand (#EDE5D0) and soft light, with lilac (#964BFA) as the only accent colour. No gradients, no textures, no harsh flash, no gritty grain. Modern Saudi settings: Riyadh skyline, Jeddah corniche, desert highways, AlUla. Golden hour or soft studio light, polished natural grading. Lifestyle and person-centred moments are welcome. Leave clean space for the MY NAGHI logo and a headline set in Space Grotesk.",
   examples:""
 };
@@ -440,12 +440,12 @@ function setMode(){
 
 /* ---------- 3b. WEBSITE AI (Netlify function at /api/generate) ---------- */
 // Returns parsed JSON, null when there is no server AI, or throws "passcode".
-async function askServer(prompt){
+async function askServer(prompt, onText){
   if (!/^https?:$/.test(location.protocol)) return null;
   let res;
   try {
     res = await fetch("/api/generate", {method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({prompt, quality, passcode: store.get("muse.pass","")})});
+      body: JSON.stringify({prompt, quality, stream: true, passcode: store.get("muse.pass","")})});
   } catch { serverIssue = "none"; return null; }
   if (res.status === 401) throw "passcode";
   if (res.status === 404) { serverIssue = "none"; return null; }
@@ -455,14 +455,29 @@ async function askServer(prompt){
     serverDetail = j.status ? " (" + j.status + ")" : "";
     return null;
   }
-  const {text} = await res.json().catch(()=>({}));
-  if (!text) { serverIssue = "failed"; serverDetail = " (empty reply)"; return null; }
+  let text = "";
+  if ((res.headers.get("content-type") || "").includes("text/plain") && res.body) {
+    // Streaming: show the captions while they are being written
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    serverAI = true; setMode();
+    for (;;) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      text += dec.decode(value, {stream: true});
+      if (onText) onText(text);
+    }
+    if (text.includes("[[error]]")) { serverIssue = "failed"; serverDetail = " (stopped early)"; text = text.replace(/\[\[error\]\][\s\S]*/, ""); }
+  } else {
+    text = ((await res.json().catch(()=>({}))).text) || "";
+  }
+  if (!text.trim()) { serverIssue = "failed"; serverDetail = serverDetail || " (empty reply)"; return null; }
   serverAI = true; setMode();
   return parseAI(text);
 }
 
 // Read the AI's reply even when its JSON is slightly off; never lose a good answer.
 function parseAI(text){
+  if (/(^|\n)\s*#{2,3}\s*\S/.test(text)) { const sec = parseSections(text); if (sec.length) return {items: sec}; }
   const tryParse = str => { try { return JSON.parse(str); } catch { return null; } };
   const repair = str => {           // escape raw line breaks / tabs that sit inside "strings"
     let out = "", inStr = false, esc = false;
@@ -567,7 +582,7 @@ function brandLines(kind, ch){
   if (b.examples && b.examples.trim()) out.push(`Real posts already published by this brand. Match their tone, wording, length, emoji and hashtag habits closely (do not copy them):\n"""\n${b.examples.trim().slice(0,4000)}\n"""`);
   if (b.name) out.push(`Brand: ${b.name}.`);
   if (b.aud) out.push(`Target audience: ${b.aud}.`);
-  if (b.keys) out.push(`Always include: ${b.keys}.`);
+  if (b.keys) out.push(`Mention when it fits (at most once, never on sensitive topics): ${b.keys}.`);
   if (b.avoid) out.push(`Never use these words or ideas: ${b.avoid}.`);
   return out.join("\n");
 }
@@ -589,7 +604,17 @@ function readCaption(){
 
 /* ---------- 6. AI INSTRUCTIONS (edit these to change the output!) ---------- */
 function aiPrompt(r){
-  if (r.kind === "prompt") return `You are an expert prompt engineer.
+  // Output format shared by both tools: easy to show while it is being written
+  const FORMAT = `Output format, exactly:
+### <2-4 word label>
+<option 1>
+### <2-4 word label>
+<option 2>
+### <2-4 word label>
+<option 3>
+Nothing before, between or after. No markdown, no bold, no "---" separators, no notes.`;
+
+  if (r.kind === "prompt") return `You are an expert prompt engineer for a premium car retailer.
 Write 3 different, ready-to-paste prompts for a ${r.target === "chat" ? "chat assistant (like Claude or ChatGPT)" : r.target + " generation AI (like Midjourney, Runway, or Sora)"}.
 The content will be posted as a ${r.channel} ${r.format}${r.len ? " (" + r.len + ")" : ""}, so fit that channel's look and viewing habits.
 Idea: ${r.idea}
@@ -597,31 +622,63 @@ ${r.make ? `Car: the ${r.year} ${r.make} ${r.model || "(pick the most fitting cu
 Every prompt must name the exact make, model and model year (e.g. "${r.year} ${r.make} ${r.model || "<model>"}") and show the latest generation and newest facelift of that model, never an older design.` : `Pick ONE specific, real car from these brands that fits the idea: ${Object.keys(CARS).join(", ")}. Use its latest model year (${r.year}). Every prompt must name that exact make, model and model year, and show the latest generation and newest facelift, never an older design.`}
 Only describe design details you are confident are correct for that model year; do not invent features.
 ${brandLines("prompt", r.channel)}
-Style: ${r.style}. Mood: ${r.mood}. ${r.target !== "chat" ? "Aspect ratio: " + r.ratio + "." : ""} Detail level: ${r.detail}.
+Style: ${r.style}. Mood: ${r.mood}. ${r.target !== "chat" ? "Aspect ratio: " + r.ratio + "." : ""} Detail level: ${r.detail}${r.detail === "Short" ? " (one sentence, under 40 words)" : r.detail === "Balanced" ? " (under 80 words)" : " (under 150 words)"}.
 ${r.target === "image" ? "Cover subject, setting, lighting, camera/lens, composition, colour palette. End with --ar " + r.ratio + "." : ""}
 ${r.target === "video" ? "Describe the shot, camera movement, action over time, lighting and pacing." : ""}
 ${r.target === "chat" ? "Give the assistant a role, the task, context, constraints and the output format." : ""}
 Write the prompts in English. Make each variant take a clearly different angle.
-Reply with only JSON: {"items":[{"text":"the prompt","angle":"2-4 word label"}]}`;
-  const langLine = r.lang === "ar" ? "Write in Arabic (natural Saudi-friendly tone)." : r.lang === "both" ? "Write each caption in English, then a natural Arabic version under it (written fresh in Arabic, not a word-for-word translation, and every word in Arabic)." : "Write in English.";
-  return `You are a social media copywriter.
+${FORMAT}`;
+
+  // Hard length limits per option (per language, before hashtags)
+  const LIMITS = {Short:[140,"1 or 2 short sentences"], Medium:[300,"2 to 4 sentences"], Long:[600,"a short paragraph or two"]};
+  let [maxChars, shape] = LIMITS[r.length] || LIMITS.Short;
+  if (r.platform === "Snapchat") { maxChars = Math.min(maxChars, 80); shape = "one short line"; }
+  const langLine = r.lang === "ar"
+    ? "Write in Arabic only."
+    : r.lang === "both"
+      ? "Write the English caption first, then a blank line, then the Arabic caption. Each language has its own length limit."
+      : "Write in English only.";
+
+  return `You are a senior social media copywriter for MY NAGHI, a premium car retailer in Saudi Arabia.
 Write 3 different captions for a ${r.platform} ${r.format}.
-Post is about: ${r.topic}
-If a car is mentioned, always use its exact make and model name, and the latest model year (${LATEST_YEAR}) unless the topic says another year.
+Topic: ${r.topic}
+
+LENGTH (most important rule): each caption is ${shape} and at most ${maxChars} characters per language, not counting hashtags. Shorter is better. If in doubt, cut.
+
+How to write:
+- Each caption makes ONE clear point about the topic. Rewrite the topic in your own words; never paste it in. Fix spelling and grammar.
+- Understand the kind of post (occasion, award, launch, offer, service, awareness day, etc.) and write it the way a skilled human social media manager would.
+- Do NOT list brands, services, numbers or proof points. Use at most ONE brand fact per caption, and only if it directly supports the topic. Most captions need none.
+- Model years: only write a year directly before a specific model (e.g. "2027 Genesis GV80"). Never put a year after a brand name on its own. If a model is named, use the latest model year (${LATEST_YEAR}) unless the topic says otherwise.
+- The "MY ___. MY ___." line may appear in at most one of the three captions.
+- Mention MYNAGHI.SA at most once per caption${r.cta ? "" : ", and only if it fits naturally"}.
+- Sensitive topics (prayers, condolences, health awareness, national events): be sincere and respectful, no selling, no brand facts.
+- Never invent prices, offers, specs, names or dates.
+${langLine}
+${r.lang !== "en" ? "- The Arabic must read as if a native Saudi copywriter wrote it: natural, warm, not a translation. Keep brand and model names in Latin letters. No English sentences inside the Arabic." : ""}
+
+Brand voice:
 ${brandLines("caption", r.platform)}
-Never invent prices, offers, specs, names or dates that are not in the topic above.
-Understand what kind of post this is (for example an employee award, a car launch, an offer, an event, hiring, a milestone or an occasion) and write it the way a skilled social media manager would for that kind of post. Rewrite the topic in your own words; never paste it in as-is. Fix spelling and grammar from the topic (e.g. "sales man" -> "salesperson").
-Hashtags must be meaningful and on-topic (for example #EmployeeOfTheMonth), never single words split out of the topic.
-Each caption must stay under ${r.limit} characters. Open with a strong hook in the first line.
-Tone: ${r.tone}. Length: ${r.length}. ${langLine}
-${r.emoji ? "Use a few fitting emojis." : "No emojis."}
-${r.tags ? "End with " + r.tagCount + " relevant hashtags." : "No hashtags."}
-${r.cta ? "Include a short call to action." : ""}
-${r.platform === "LinkedIn" ? "Keep it professional, use short paragraphs and line breaks." : ""}
-${r.platform === "Snapchat" ? "Keep it very short and casual." : ""}
-${r.platform === "TikTok" ? "Sound native to TikTok: casual, punchy, trend-aware." : ""}
-Follow ${r.platform}'s style. Make each caption take a different angle.
-Reply with only JSON: {"items":[{"text":"the caption","angle":"2-4 word label"}]}`;
+
+Settings: tone ${r.tone}. ${r.emoji ? "Use one or two fitting emojis at most." : "No emojis."} ${r.tags ? "End with " + r.tagCount + " meaningful, on-topic hashtags on their own line (e.g. #EmployeeOfTheMonth), never words split out of the topic." : "No hashtags."} ${r.cta ? "End with one short call to action." : ""}
+${r.platform === "Instagram" ? "Instagram: the first line must work on its own, because only about 125 characters show before \"more\"." : ""}
+${r.platform === "LinkedIn" ? "LinkedIn: professional, short paragraphs." : ""}
+${r.platform === "TikTok" ? "TikTok: casual and punchy." : ""}
+${r.platform === "Snapchat" ? "Snapchat: very short and casual." : ""}
+Make the three captions take clearly different angles.
+
+${FORMAT}`;
+}
+
+// Split "### label" sections into cards (works on partial text while streaming)
+function parseSections(text){
+  const parts = ("\n" + text).split(/\n\s*#{2,3}\s*/).slice(1);
+  return parts.map(p => {
+    const nl = p.indexOf("\n");
+    const angle = (nl < 0 ? p : p.slice(0, nl)).replace(/[*:]/g, "").trim();
+    const body = nl < 0 ? "" : p.slice(nl + 1).replace(/\n-{3,}\s*$/,"").trim();
+    return {angle, text: body};
+  }).filter(x => x.text);
 }
 
 /* ---------- 7. BUILT-IN TEMPLATES (used when AI is off) ---------- */
@@ -681,6 +738,11 @@ function local(r){
 
 /* ---------- 8. GENERATE ---------- */
 let ctl = null;
+let liveFrame = 0;
+function liveRender(text){
+  cancelAnimationFrame(liveFrame);
+  liveFrame = requestAnimationFrame(() => { const it = parseSections(text); if (it.length) render(it); });
+}
 async function generate(r){
   const t = T[lang];
   if (!(r.idea || r.topic)) { $("note").textContent = t.needIdea; $("note").className="note err"; return; }
@@ -693,7 +755,8 @@ async function generate(r){
   if (sample){
     ctl?.abort(); ctl = new AbortController();
     try {
-      const res = await sample.json(aiPrompt(r), {signal:ctl.signal, cache:false, modelTier: quality==="fast" ? "quick" : "default"});
+      const {text} = await sample(aiPrompt(r), {signal:ctl.signal, cache:false, modelTier: quality==="fast" ? "quick" : "default", onText: ({text}) => liveRender(text)});
+      const res = parseAI(text);
       items = (res.items||[]).filter(x=>x && x.text); usedAI = items.length>0;
     } catch(e){
       if (e.code==="cancelled") { btn.disabled=false; return; }
@@ -703,11 +766,15 @@ async function generate(r){
   }
   if (!sample) {
     try {
-      const res = await askServer(aiPrompt(r));
+      const res = await askServer(aiPrompt(r), liveRender);
       if (res) { items = (res.items||[]).filter(x=>x && x.text); usedAI = items.length>0; }
     } catch (e) {
-      if (e === "passcode") { $("gate").hidden = false; $("pass").focus();
-        $("note").textContent = store.get("muse.pass","") ? t.passBad : ""; }
+      if (e === "passcode") {
+        $("gate").hidden = false; $("pass").focus();
+        $("results").innerHTML = "";
+        $("note").textContent = store.get("muse.pass","") ? t.passBad : t.passAsk;
+        last = r; btn.disabled = false; return;
+      }
     }
   }
   if (!items || !items.length) {
@@ -718,6 +785,7 @@ async function generate(r){
     items = local(r);
     $("note").textContent = T[lang]["why_"+(serverIssue||"none")] + serverDetail;
   }
+  cancelAnimationFrame(liveFrame);
   render(items);
   history.unshift({kind:r.kind, label:r.idea||r.topic, text:items[0].text, at:Date.now()});
   history = history.slice(0,8); store.set("muse.hist",history); renderHist();
@@ -731,7 +799,7 @@ function showNoAI(r){
   const p = document.createElement("p"); p.textContent = t["why_"+(serverIssue||"none")] + serverDetail;
   warn.append(h, p); box.append(warn);
   last = r;
-  render([{text: aiPrompt(r).replace(/Reply with only JSON:[\s\S]*$/, "Give the 3 options numbered 1 to 3, with no extra commentary."), angle: t.noAiTag}], true);
+  render([{text: aiPrompt(r).replace(/Output format, exactly:[\s\S]*$/, "Give the 3 options numbered 1 to 3, with no extra commentary."), angle: t.noAiTag}], true);
   box.prepend(warn);
   $("note").textContent = t.noAiHow;
 }
